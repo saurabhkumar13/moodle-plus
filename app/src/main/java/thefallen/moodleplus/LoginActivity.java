@@ -64,7 +64,7 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Intent intent = new Intent(mContext, MainActivity.class);//LoginActivity.class,MainActivity.class);
+                        Intent intent = new Intent(mContext, NavDrawerActivity.class);//LoginActivity.class,MainActivity.class);
                         intent.putExtra("json",response);
                         startActivity(intent);
                         // Result handling
