@@ -57,7 +57,7 @@ public class LoginActivity extends AppCompatActivity {
     }
     public void callApi(final String name,final String pass)
     {
-        String url = "http://10.0.0.6:8080/default/login.json";
+        String url = "http://10.0.0.5:8080/default/login.json";
 
         // Request a string response
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,

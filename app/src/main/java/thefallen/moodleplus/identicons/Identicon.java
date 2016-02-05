@@ -37,7 +37,7 @@ abstract public class Identicon extends View {
 	private volatile byte[] mHash;
 	private volatile int[][] mColors;
 	private volatile boolean mReady;
-
+	protected int input;
 	public Identicon(Context context) {
 		super(context);
 
@@ -108,40 +108,8 @@ abstract public class Identicon extends View {
 	}
 	
 	public void show(int input) {
+		this.input=input;
 		show(String.valueOf(input));
-	}
-	
-	public void show(long input) {
-		show(String.valueOf(input));
-	}
-	
-	public void show(float input) {
-		show(String.valueOf(input));
-	}
-	
-	public void show(double input) {
-		show(String.valueOf(input));
-	}
-	
-	public void show(byte input) {
-		show(String.valueOf(input));
-	}
-	
-	public void show(char input) {
-		show(String.valueOf(input));
-	}
-	
-	public void show(boolean input) {
-		show(String.valueOf(input));
-	}
-	
-	public void show(Object input) {
-		if (input == null) {
-			mHash = null;
-		}
-		else {
-			show(String.valueOf(input));
-		}
 	}
 	
 	protected void setupColors() {
