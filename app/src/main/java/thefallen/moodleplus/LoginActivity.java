@@ -1,5 +1,7 @@
 package thefallen.moodleplus;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,10 +30,12 @@ public class LoginActivity extends AppCompatActivity {
 
     EditText userID,password;
     Button login;
+    Context mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        mContext = this;
         userID= (EditText) findViewById(R.id.userid);
         password = (EditText) findViewById(R.id.password);
         login = (Button) findViewById(R.id.login);
@@ -60,7 +64,9 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-
+                        Intent intent = new Intent(mContext, MainActivity.class);//LoginActivity.class,MainActivity.class);
+                        intent.putExtra("json",response);
+                        startActivity(intent);
                         // Result handling
                         System.out.println(response);
                     }
