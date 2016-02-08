@@ -1,8 +1,8 @@
-# Hey #
+#** READ THE WIKI AND START WORKING YOU FUCKTARDS** #
 
-![meh.jpg](https://bitbucket.org/repo/gqKbXp/images/1132500174-meh.jpg)
+![meh.gif](http://awesomegifs.com/wp-content/uploads/middle-finger-rage-face.gif)
 ```
-server now running at 10.0.0.16:8080 
+server running at 10.0.0.16:8080 
 ```
 // its static for now on azura/waifu
 ```
