@@ -3,6 +3,7 @@ package thefallen.moodleplus;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +16,7 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,13 +51,20 @@ public class NavDrawerActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View header = navigationView.inflateHeaderView(R.layout.nav_header_nav_drawer);
-        navigationView.inflateMenu(R.menu.activity_nav_drawer_drawer);
+        Menu m = navigationView.getMenu();
+        SubMenu topChannelMenu = m.addSubMenu("Courses");
+        MenuItem mi = m.getItem(m.size()-1);
+        mi.setTitle(mi.getTitle());
         TextView text1 = (TextView) header.findViewById(R.id.userName);
         TextView text2 = (TextView) header.findViewById(R.id.userEmail);
-        SymmetricIdenticon symmetricIdenticon = (SymmetricIdenticon) header.findViewById(R.id.sidenticon);
-        JSONObject user_details;
+        SymmetricIdenticon symmetricIdenticon = (SymmetricIdenticon) header.findViewById(R.id.identicon);
+        JSONObject user_details,courses;
         try {
-            user_details = new JSONObject(getIntent().getStringExtra("json"));
+            user_details = new JSONObject(getIntent().getStringExtra("json_user"));
+            courses = new JSONObject(getIntent().getStringExtra("json_courses"));
+            JSONArray coursesList = courses.getJSONArray("courses");
+            for(int i=0;i<coursesList.length();i++)
+            topChannelMenu.add(coursesList.getJSONObject(i).getString("code").toUpperCase()+": "+coursesList.getJSONObject(i).getString("name"));
             user_details = user_details.getJSONObject("user");
             text1.setText(user_details.getString("first_name"));
             text2.setText(user_details.getString("email"));
@@ -63,6 +72,7 @@ public class NavDrawerActivity extends AppCompatActivity
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
     }
 
     @Override
