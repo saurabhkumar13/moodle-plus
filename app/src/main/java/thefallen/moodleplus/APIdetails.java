@@ -13,4 +13,8 @@ public class APIdetails {
     {
         return host+"/courses/list.json";
     }
+    public static String coursesThreads()
+    {
+        return host+"/courses/course.json";
+    }
 }

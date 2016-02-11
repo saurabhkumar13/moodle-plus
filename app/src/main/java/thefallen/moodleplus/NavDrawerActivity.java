@@ -3,6 +3,7 @@ package thefallen.moodleplus;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -16,23 +17,37 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import thefallen.moodleplus.identicons.AsymmetricIdenticon;
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
 public class NavDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+    RequestQueue queue;
+    ArrayList<thread> threads;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nav_drawer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        threads = new ArrayList<>();
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,12 +74,17 @@ public class NavDrawerActivity extends AppCompatActivity
         TextView text2 = (TextView) header.findViewById(R.id.userEmail);
         SymmetricIdenticon symmetricIdenticon = (SymmetricIdenticon) header.findViewById(R.id.identicon);
         JSONObject user_details,courses;
+        String[]  code=null;
         try {
             user_details = new JSONObject(getIntent().getStringExtra("json_user"));
             courses = new JSONObject(getIntent().getStringExtra("json_courses"));
             JSONArray coursesList = courses.getJSONArray("courses");
-            for(int i=0;i<coursesList.length();i++)
-            topChannelMenu.add(coursesList.getJSONObject(i).getString("code").toUpperCase()+": "+coursesList.getJSONObject(i).getString("name"));
+            code = new String[coursesList.length()];
+            for(int i=0;i<coursesList.length();i++) {
+                code[i] = coursesList.getJSONObject(i).getString("code");
+                topChannelMenu.add(coursesList.getJSONObject(i).getString("code").toUpperCase() + ": " + coursesList.getJSONObject(i).getString("name"));
+                // TODO add menu actions
+            }
             user_details = user_details.getJSONObject("user");
             text1.setText(user_details.getString("first_name"));
             text2.setText(user_details.getString("email"));
@@ -72,9 +92,40 @@ public class NavDrawerActivity extends AppCompatActivity
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+        queue = Volley.newRequestQueue(this);
+        getThreads(code, 0);
     }
+    public void getThreads(final String[] code,final int in)
+    {
+        String url = APIdetails.coursesThreads()+"/"+code[in]+"/threads";
+        Log.e("json",url);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.e("json", response);
+                        try {
+                            JSONArray course_threads = (new JSONObject(response)).getJSONArray("course_threads");
+                            for(int i=0;i<course_threads.length();i++) threads.add(new thread(course_threads.getJSONObject(i)));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if(in<code.length-1) getThreads(code,in+1);
+                        else    {
+                            Collections.sort(threads);
+                            //TODO display threads with card adapter or whateva
+                            Log.e("LIST", threads.toString());}
 
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if(in<code.length-1) getThreads(code,in+1);
+            }
+        });
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

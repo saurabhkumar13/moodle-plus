@@ -91,7 +91,7 @@ abstract public class Identicon extends View {
 			// generate a hash from the string to get unique but deterministic byte values 
 			try {
 				final MessageDigest digest = java.security.MessageDigest.getInstance(HASH_ALGORITHM);
-				digest.update(input == null ? new byte[0] : input.getBytes());
+				digest.update(input.getBytes());
 				mHash = digest.digest();
 			}
 			catch (Exception e) {
@@ -109,7 +109,7 @@ abstract public class Identicon extends View {
 	
 	public void show(int input) {
 		this.input=input;
-		show(String.valueOf(input));
+		show(String.valueOf(input+"mew"));
 	}
 	
 	protected void setupColors() {
@@ -122,7 +122,7 @@ abstract public class Identicon extends View {
 					mColors[r][c] = colorVisible;
 				}
 				else {
-					mColors[r][c] = Color.TRANSPARENT;
+					mColors[r][c] = Color.parseColor("#F0F0F0");
 				}
 			}
 		}

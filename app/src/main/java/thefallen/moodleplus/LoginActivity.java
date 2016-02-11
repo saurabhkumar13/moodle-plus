@@ -3,6 +3,7 @@ package thefallen.moodleplus;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -92,6 +93,7 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        Log.e("json",response);
                         intent = new Intent(mContext, NavDrawerActivity.class);//LoginActivity.class,MainActivity.class);
                         intent.putExtra("json_user",response);
                         getDetails(APIdetails.coursesList());
@@ -136,7 +138,6 @@ public class LoginActivity extends AppCompatActivity {
     }
     public void getDetails(String url)
     {
-
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override

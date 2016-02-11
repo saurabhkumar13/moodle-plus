@@ -22,7 +22,7 @@ import android.util.AttributeSet;
 
 public class SymmetricIdenticon extends Identicon {
 	
-	private static final int CENTER_COLUMN_INDEX = 5;
+	private static final int CENTER_COLUMN_INDEX = 3;
 
 	public SymmetricIdenticon(Context context) {
 		super(context);
@@ -57,12 +57,12 @@ public class SymmetricIdenticon extends Identicon {
 
 	@Override
 	protected int getRowCount() {
-		return 10;
+		return 5;
 	}
 
 	@Override
 	protected int getColumnCount() {
-		return 10;
+		return 5;
 	}
 
 }
