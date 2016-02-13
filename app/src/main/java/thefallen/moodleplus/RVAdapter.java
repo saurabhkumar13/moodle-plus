@@ -1,6 +1,10 @@
 package thefallen.moodleplus;
 
 
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,13 +24,14 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ElementHolder> {
 
         CardView cv;
         TextView title;
+        TextView course;
         TextView description;
-        TextView time;
         SymmetricIdenticon identicon;
         ElementHolder(View itemView) {
             super(itemView);
             cv = (CardView)itemView.findViewById(R.id.cv);
             title = (TextView)itemView.findViewById(R.id.title);
+            course = (TextView)itemView.findViewById(R.id.course);
             description = (TextView)itemView.findViewById(R.id.description);
             identicon = (SymmetricIdenticon)itemView.findViewById(R.id.identicon);
         }
@@ -57,6 +62,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ElementHolder> {
         elementHolder.title.setText(elements.get(i).title);
         elementHolder.description.setText(elements.get(i).description);
         elementHolder.identicon.show(elements.get(i).user_id);
+        elementHolder.course.setText(elements.get(i).course);
     }
 
     @Override

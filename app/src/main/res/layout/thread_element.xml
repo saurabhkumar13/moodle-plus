@@ -5,7 +5,8 @@
     xmlns:android.support.v7.cardview="http://schemas.android.com/apk/res-auto"
     android.support.v7.cardview:cardElevation="5dp"
     android:layout_margin="5dp"
-    android:id="@+id/cv">
+    android:id="@+id/cv"
+    >
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -30,11 +31,18 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
         >
-
         <TextView
-            android:layout_width="wrap_content"
+            android:padding="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/course"
+            android:gravity="end"
+            />
+        <TextView
+            android:paddingTop="16dp"
+            android:paddingLeft="16dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/title"
             android:textStyle="bold"
@@ -42,6 +50,8 @@
             android:textSize="20sp"
             />
         <TextView
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/description"

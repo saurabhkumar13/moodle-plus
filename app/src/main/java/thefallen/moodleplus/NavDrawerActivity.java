@@ -130,7 +130,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         Log.e("json", response);
                         try {
                             JSONArray course_threads = (new JSONObject(response)).getJSONArray("course_threads");
-                            for(int i=0;i<course_threads.length();i++) threads.add(new thread(course_threads.getJSONObject(i)));
+                            for(int i=0;i<course_threads.length();i++) threads.add(new thread(course_threads.getJSONObject(i),code[in]));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
