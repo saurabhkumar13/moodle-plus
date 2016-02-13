@@ -1,8 +1,12 @@
 package thefallen.moodleplus;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.SubMenu;
 import android.view.View;
@@ -30,6 +34,8 @@ import org.json.JSONObject;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +47,8 @@ public class NavDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     RequestQueue queue;
     ArrayList<thread> threads;
+    Context mContext;
+    private RecyclerView rv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +56,12 @@ public class NavDrawerActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         threads = new ArrayList<>();
+        mContext = this;
+        rv = (RecyclerView) findViewById(R.id.rv);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        rv.setLayoutManager(llm);
+        rv.setHasFixedSize(true);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,6 +70,16 @@ public class NavDrawerActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });
+
+        rv.addOnItemTouchListener(
+                new RecyclerItemClickListener(mContext, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        // TODO onClick open thread
+                        }
+                    }
+                )
+        );
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -113,6 +137,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         if(in<code.length-1) getThreads(code,in+1);
                         else    {
                             Collections.sort(threads);
+                            initializeAdapter();
                             //TODO display threads with card adapter or whateva
                             Log.e("LIST", threads.toString());}
 
@@ -125,6 +150,10 @@ public class NavDrawerActivity extends AppCompatActivity
         });
 // Add the request to the RequestQueue.
         queue.add(stringRequest);
+    }
+    private void initializeAdapter(){
+        RVAdapter adapter = new RVAdapter(threads);
+        rv.setAdapter(adapter);
     }
     @Override
     public void onBackPressed() {

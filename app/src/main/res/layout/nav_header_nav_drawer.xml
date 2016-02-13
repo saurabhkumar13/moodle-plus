@@ -11,12 +11,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
     <View
-        android:layout_width="66dp"
-        android:layout_height="66dp"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
         android:background="@drawable/circle"
         android:layout_gravity="center"
-        android:clipChildren="true"
-        android:clipToPadding="true"
         />
     <thefallen.moodleplus.identicons.SymmetricIdenticon
         android:id="@+id/identicon"
