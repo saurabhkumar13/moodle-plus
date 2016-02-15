@@ -77,6 +77,8 @@ public class LoginActivity extends AppCompatActivity {
         String userID = sharedPreferences.getString("userID", "");
         String password = sharedPreferences.getString("password", "");
         if(!userID.equals("")&&!password.equals("")) callApi(userID,password);
+        this.userID.setText(userID);
+        this.password.setText(password);
         // CookieStore is just an interface, you can implement it and do things like
         // Optionally, you can just use the default CookieManager
         CookieManager manager = new java.net.CookieManager();

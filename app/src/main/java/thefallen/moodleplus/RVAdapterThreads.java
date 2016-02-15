@@ -1,11 +1,13 @@
 package thefallen.moodleplus;
 
 
+import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class RVAdapterThreads extends RecyclerView.Adapter<RVAdapterThreads.Elem
         TextView course;
         TextView description;
         SymmetricIdenticon identicon;
+
         ElementHolder(View itemView) {
             super(itemView);
             cv = (CardView)itemView.findViewById(R.id.cv);
@@ -33,11 +36,10 @@ public class RVAdapterThreads extends RecyclerView.Adapter<RVAdapterThreads.Elem
     }
 
     List<thread> elements;
-
+    Context context;
     RVAdapterThreads(List<thread> elements){
         this.elements = elements;
     }
-
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -49,17 +51,29 @@ public class RVAdapterThreads extends RecyclerView.Adapter<RVAdapterThreads.Elem
     public ElementHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.thread_element, viewGroup, false);
         ElementHolder eh = new ElementHolder(v);
+        context = viewGroup.getContext();
         return eh;
     }
-
+    @Override
+    public void onViewDetachedFromWindow(ElementHolder elementHolder)
+    {
+        elementHolder.cv.clearAnimation();
+    }
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
         elementHolder.title.setText(elements.get(i).getTitle());
         elementHolder.description.setText(elements.get(i).getDescription());
         elementHolder.identicon.show(elements.get(i).getUser_id());
         elementHolder.course.setText(elements.get(i).getCourse());
-    }
+        elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
+        elementHolder.cv.animate()
+                .setStartDelay(i * 200)
+                .translationXBy(DisplayHelper.getWidth(context))
+                .setInterpolator(new OvershootInterpolator())
+                .setDuration(600)
+                .start();
 
+    }
     @Override
     public int getItemCount() {
         return elements.size();

@@ -12,14 +12,14 @@ import java.sql.Timestamp;
  */
 public class DisplayHelper {
 
+
     //converts dp into pixels
     //http://stackoverflow.com/questions/8309354/formula-px-to-dp-dp-to-px-android
 
     public static int dpToPx(int dp, Context mContext) {
 
         DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
-        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-        return px;
+        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
     //Returns height of the current display
@@ -28,6 +28,12 @@ public class DisplayHelper {
         DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
         return displayMetrics.heightPixels;
     }
+    public static int getWidth(Context mContext){
+
+        DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+        return displayMetrics.widthPixels;
+    }
+
     public static String timeFromNow(Timestamp timestamp)
     {
         String res;

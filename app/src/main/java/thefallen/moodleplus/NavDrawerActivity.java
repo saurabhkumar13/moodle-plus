@@ -44,12 +44,14 @@ public class NavDrawerActivity extends AppCompatActivity
 
     RequestQueue queue;
     ArrayList<thefallen.moodleplus.ThreadHelper.thread> threads;
+    ArrayList<notification> notifications;
     Context mContext;
     RecyclerView rv;
     SharedPreferences sharedPreferences;
     NavigationView navigationView;
     ImageView logout;
     SubMenu topChannelMenu;
+    boolean currentRVThreadAdapter = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,7 @@ public class NavDrawerActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         threads = new ArrayList<>();
+        notifications = new ArrayList<>();
         mContext = this;
         sharedPreferences = getSharedPreferences("userData",MODE_PRIVATE);
         queue = Volley.newRequestQueue(this);
@@ -97,14 +100,31 @@ public class NavDrawerActivity extends AppCompatActivity
         topChannelMenu.add("Notifications").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener(){
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                //TODO onClick listeners
-                return false;
-            }
-        });
-        topChannelMenu.add("Grades").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener(){
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                //TODO onClick listeners
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.notifications(),
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                notifications = new ArrayList<>();
+                                try {
+                                    JSONArray notifications_json_array = ((new JSONObject(response)).getJSONArray("notifications"));
+                                    for(int i=0;i<notifications_json_array.length();i++){
+                                        notifications.add(new notification(notifications_json_array.getJSONObject(i)));
+                                    }
+                                    initializeAdapter(new RVAdapterNoti(notifications));
+                                    currentRVThreadAdapter=false;
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        finish();
+                    }
+                });
+                // Add the request to the RequestQueue.
+                queue.add(stringRequest);
                 return false;
             }
         });
@@ -170,12 +190,12 @@ public class NavDrawerActivity extends AppCompatActivity
         MenuItem mi = m.getItem(m.size()-1);
         mi.setTitle(mi.getTitle());
         logout = new ImageView(mContext);
-        FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, DisplayHelper.dpToPx(64,mContext));
+        FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, DisplayHelper.dpToPx(54,mContext));
         flp.gravity= Gravity.BOTTOM;
         logout.setBackgroundResource(R.drawable.rectangle);
         logout.setLayoutParams(flp);
         logout.setScaleType(ImageView.ScaleType.CENTER);
-        logout.setImageDrawable(getResources().getDrawable(R.drawable.ic_power_settings_new_red_900_48dp));
+        logout.setImageDrawable(getResources().getDrawable(R.drawable.ic_power_settings_new_white_18dp));
         navigationView.addView(logout);
 
         JSONObject courses;
@@ -217,7 +237,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         }
                         if(in<code.length-1) getThreads(code,in+1);
                         else    {
-                            initializeAdapter();
+                            initializeAdapter(new RVAdapterThreads(threads));
                         }
 
                     }
@@ -232,8 +252,7 @@ public class NavDrawerActivity extends AppCompatActivity
     }
 
     // Initialize cards to display
-    private void initializeAdapter(){
-        RVAdapterThreads adapter = new RVAdapterThreads(threads);
+    private void initializeAdapter(RecyclerView.Adapter adapter){
         rv.setAdapter(adapter);
     }
 
@@ -243,7 +262,13 @@ public class NavDrawerActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        }
+        else if(!currentRVThreadAdapter)
+        {
+            rv.setAdapter(new RVAdapterThreads(threads));
+            currentRVThreadAdapter=true;
+        }
+        else {
             super.onBackPressed();
         }
     }
@@ -265,7 +290,7 @@ public class NavDrawerActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Collections.sort(threads, new updatedAtComp(-1));
-            initializeAdapter();
+            initializeAdapter(new RVAdapterThreads(threads));
             return true;
         }
 
