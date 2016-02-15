@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -234,7 +233,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
     // Initialize cards to display
     private void initializeAdapter(){
-        RVAdapter adapter = new RVAdapter(threads);
+        RVAdapterThreads adapter = new RVAdapterThreads(threads);
         rv.setAdapter(adapter);
     }
 
@@ -265,7 +264,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Collections.sort(threads,new updatedAtComp(-1));
+            Collections.sort(threads, new updatedAtComp(-1));
             initializeAdapter();
             return true;
         }

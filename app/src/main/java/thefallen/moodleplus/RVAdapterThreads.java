@@ -1,10 +1,6 @@
 package thefallen.moodleplus;
 
 
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,14 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.List;
 
 import thefallen.moodleplus.ThreadHelper.thread;
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
-public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ElementHolder> {
+public class RVAdapterThreads extends RecyclerView.Adapter<RVAdapterThreads.ElementHolder> {
 
     public static class ElementHolder extends RecyclerView.ViewHolder {
 
@@ -40,7 +34,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ElementHolder> {
 
     List<thread> elements;
 
-    RVAdapter(List<thread> elements){
+    RVAdapterThreads(List<thread> elements){
         this.elements = elements;
     }
 

@@ -3,6 +3,8 @@ package thefallen.moodleplus;
 import android.content.Context;
 import android.util.DisplayMetrics;
 
+import java.sql.Timestamp;
+
 /**
  * Created by mayank on 10/01/16.
  * Helper class to help with the calculations regarding layout parameters on the screen.
@@ -25,5 +27,23 @@ public class DisplayHelper {
 
         DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
         return displayMetrics.heightPixels;
+    }
+    public static String timeFromNow(Timestamp timestamp)
+    {
+        String res;
+        int secs = (int) ((System.currentTimeMillis() - timestamp.getTime()) / 1000);
+        int min = secs / 60;
+        secs = secs % 60;
+        int hours =  min / 60;
+        int days = hours / 24;
+        if (days > 1) res = days + " days " + hours % 24 + " hours";
+        else if(days == 1) res = days + " day " + hours % 24 + " hours";
+        else if (hours != 0) res = hours + " hours";
+        else if (min > 10)
+            res = min + " mins";
+        else if (min != 0)
+            res = min + " mins " + secs + " secs";
+        else res = secs + " secs";
+        return res+" ago";
     }
 }
