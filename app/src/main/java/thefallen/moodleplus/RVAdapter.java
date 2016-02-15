@@ -16,6 +16,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 
+import thefallen.moodleplus.ThreadHelper.thread;
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ElementHolder> {
@@ -59,10 +60,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ElementHolder> {
 
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
-        elementHolder.title.setText(elements.get(i).title);
-        elementHolder.description.setText(elements.get(i).description);
-        elementHolder.identicon.show(elements.get(i).user_id);
-        elementHolder.course.setText(elements.get(i).course);
+        elementHolder.title.setText(elements.get(i).getTitle());
+        elementHolder.description.setText(elements.get(i).getDescription());
+        elementHolder.identicon.show(elements.get(i).getUser_id());
+        elementHolder.course.setText(elements.get(i).getCourse());
     }
 
     @Override

@@ -3,13 +3,13 @@ package thefallen.moodleplus;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.android.volley.AuthFailureError;
@@ -28,9 +28,6 @@ import org.json.JSONObject;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
-import java.net.CookiePolicy;
-import java.net.CookieStore;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,24 +39,37 @@ public class LoginActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     Intent intent;
     RequestQueue queue;
+    View.OnClickListener loginAction;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         mContext = this;
         queue = Volley.newRequestQueue(mContext);
-        sharedPreferences = getSharedPreferences("userData",MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE);
         userID= (EditText) findViewById(R.id.userid);
         password = (EditText) findViewById(R.id.password);
         login = (Button) findViewById(R.id.login);
-        login.setOnClickListener(new View.OnClickListener(){
+
+        loginAction = new View.OnClickListener() {
             @Override
-            public void onClick(View v){
-            if(validate())
-                login();
+            public void onClick(View v) {
+                if (validate())
+                    login();
             }
-        });
+        };
+        login.setOnClickListener(loginAction);
     }
+    // To Display errors
+    // (id of the error string:int,to retry or not to retry:boolean) ==> params
+    void errorSnack(int strID,boolean retry)
+    {
+        Snackbar snackbar = Snackbar.make(login,strID,Snackbar.LENGTH_SHORT);
+        if(retry) snackbar.setAction("RETRY", loginAction);
+                snackbar.show();
+    }
+
     @Override
     public void onStart()
     {
@@ -68,22 +78,32 @@ public class LoginActivity extends AppCompatActivity {
         String password = sharedPreferences.getString("password", "");
         if(!userID.equals("")&&!password.equals("")) callApi(userID,password);
         // CookieStore is just an interface, you can implement it and do things like
-// Optionally, you can just use the default CookieManager
+        // Optionally, you can just use the default CookieManager
         CookieManager manager = new java.net.CookieManager();
         CookieHandler.setDefault(manager);
     }
     boolean validate()
     {
-        return true;
+        return !userID.getText().toString().equals("")&&!password.getText().toString().equals("");
     }
     void login()
     {
+        //save user details if remember me checked
+        if(((CheckBox)findViewById(R.id.save_details)).isChecked()){
         SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
         sharedPreferencesEditor.putString("userID", userID.getText().toString());
         sharedPreferencesEditor.putString("password", password.getText().toString());
         sharedPreferencesEditor.apply();
+        }
+        
+        // call the api with user details    
         callApi(userID.getText().toString(), password.getText().toString());
+    
     }
+
+    // post request to log in to the system
+    // (username:String,password:String) -> void
+    // onSuccess gets further details from the API and starts the next activity
     public void callApi(final String name,final String pass)
     {
         String url = APIdetails.login();
@@ -94,11 +114,15 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         Log.e("json",response);
-                        intent = new Intent(mContext, NavDrawerActivity.class);//LoginActivity.class,MainActivity.class);
-                        intent.putExtra("json_user",response);
-                        getDetails(APIdetails.coursesList());
-                        // Result handling
-                        System.out.println(response);
+                        try {
+                            if((new JSONObject(response)).getBoolean("success"))
+                            {intent = new Intent(mContext, NavDrawerActivity.class);
+                            intent.putExtra("json_user",response);
+                            getDetails(APIdetails.coursesList());}
+                            else errorSnack(R.string.wrong_credentials,false);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -107,11 +131,11 @@ public class LoginActivity extends AppCompatActivity {
                 volleyError.printStackTrace();
 
                 if(volleyError instanceof NoConnectionError) {
-//                    errorSnack(R.string.error_noInternet);
+                    errorSnack(R.string.no_internet,true);
                 } else if (volleyError instanceof TimeoutError) {
-//                    errorSnack(R.string.error_timeOut);
+                    errorSnack(R.string.timeout,true);
                 } else if (volleyError instanceof ServerError) {
-//                    errorSnack(R.string.error_serverError);
+                    errorSnack(R.string.internal_server,true);
                 }
             }
         }){
@@ -132,7 +156,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
-        // Add the request to the queue
+            // Add the request to the queue
             queue.add(stringRequest);
 
     }
@@ -142,16 +166,26 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                    intent.putExtra("json_courses",response);
-                        Log.e("json",response);
-                    startActivity(intent);
+                    if(response.equals("{}\n")) errorSnack(R.string.error,true);
+                    else {
+                        intent.putExtra("json_courses", response);
+                        Log.e("json", "("+response+")");
+                        startActivity(intent);
+                    }
                     }
                 }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error) {
+            public void onErrorResponse(VolleyError volleyError) {
+                if(volleyError instanceof NoConnectionError) {
+                    errorSnack(R.string.no_internet,true);
+                } else if (volleyError instanceof TimeoutError) {
+                    errorSnack(R.string.timeout,true);
+                } else if (volleyError instanceof ServerError) {
+                    errorSnack(R.string.internal_server,true);
+                }
             }
         });
-// Add the request to the RequestQueue.
+        // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
 }

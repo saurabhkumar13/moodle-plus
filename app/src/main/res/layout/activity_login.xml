@@ -11,6 +11,7 @@
     tools:context="thefallen.moodleplus.LoginActivity">
 
     <!-- Login progress -->
+
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -27,6 +28,12 @@
         android:hint="password"
         android:id="@+id/password"
         android:inputType="textPassword"/>
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Remember me"
+        android:id="@+id/save_details"
+        android:layout_gravity="left"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
