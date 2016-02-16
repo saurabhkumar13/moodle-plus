@@ -13,27 +13,29 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHolder> {
+public class RVAdapterGrades extends RecyclerView.Adapter<RVAdapterGrades.ElementHolder> {
 
     public static class ElementHolder extends RecyclerView.ViewHolder {
 
         CardView cv;
-        TextView time;
-        TextView description;
-//        SymmetricIdenticon identicon;
+        TextView marks;
+        TextView absMarks;
+        TextView title;
+        //        SymmetricIdenticon identicon;
         ElementHolder(View itemView) {
             super(itemView);
             cv = (CardView)itemView.findViewById(R.id.cv);
-            time = (TextView)itemView.findViewById(R.id.time);
+            title = (TextView)itemView.findViewById(R.id.title);
 //            course = (TextView)itemView.findViewById(R.id.course);
-            description = (TextView)itemView.findViewById(R.id.description);
+            marks = (TextView)itemView.findViewById(R.id.marks);
+            absMarks = (TextView)itemView.findViewById(R.id.absMarks);
 //            identicon = (SymmetricIdenticon)itemView.findViewById(R.id.identicon);
         }
     }
 
-    List<notification> elements;
+    List<grade> elements;
     Context context;
-    RVAdapterNoti(List<notification> elements){
+    RVAdapterGrades(List<grade> elements){
         this.elements = elements;
     }
 
@@ -46,7 +48,7 @@ public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHol
 
     @Override
     public ElementHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.notifications_element, viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grade_element, viewGroup, false);
         ElementHolder eh = new ElementHolder(v);
         context = viewGroup.getContext();
         return eh;
@@ -54,10 +56,9 @@ public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHol
 
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
-        elementHolder.time.setText(DisplayHelper.timeFromNow(elements.get(i).createdAt,1));
-        elementHolder.description.setText(elements.get(i).description);
-        if(elements.get(i).not_seen)
-            elementHolder.cv.setCardBackgroundColor(Color.parseColor("#f03498"));
+        elementHolder.title.setText(elements.get(i).title);
+        elementHolder.marks.setText(elements.get(i).score+" / "+elements.get(i).outOf);
+        elementHolder.absMarks.setText(String.format( "%.2f", elements.get(i).score*elements.get(i).weightage/elements.get(i).outOf)+" %");
 //        elementHolder.identicon.show(elements.get(i).user_id);
 //        elementHolder.course.setText(elements.get(i).course_code);
         elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));

@@ -13,27 +13,31 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHolder> {
+public class RVAdapterAssignments extends RecyclerView.Adapter<RVAdapterAssignments.ElementHolder> {
 
     public static class ElementHolder extends RecyclerView.ViewHolder {
 
         CardView cv;
+        TextView title;
+        TextView createdOn;
         TextView time;
         TextView description;
-//        SymmetricIdenticon identicon;
+        //        SymmetricIdenticon identicon;
         ElementHolder(View itemView) {
             super(itemView);
             cv = (CardView)itemView.findViewById(R.id.cv);
             time = (TextView)itemView.findViewById(R.id.time);
+            title = (TextView)itemView.findViewById(R.id.title);
+            createdOn = (TextView)itemView.findViewById(R.id.createdOn);
 //            course = (TextView)itemView.findViewById(R.id.course);
             description = (TextView)itemView.findViewById(R.id.description);
 //            identicon = (SymmetricIdenticon)itemView.findViewById(R.id.identicon);
         }
     }
 
-    List<notification> elements;
+    List<assignmentListItem> elements;
     Context context;
-    RVAdapterNoti(List<notification> elements){
+    RVAdapterAssignments(List<assignmentListItem> elements){
         this.elements = elements;
     }
 
@@ -46,7 +50,7 @@ public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHol
 
     @Override
     public ElementHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.notifications_element, viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.assignment_element, viewGroup, false);
         ElementHolder eh = new ElementHolder(v);
         context = viewGroup.getContext();
         return eh;
@@ -54,10 +58,10 @@ public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHol
 
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
-        elementHolder.time.setText(DisplayHelper.timeFromNow(elements.get(i).createdAt,1));
+        elementHolder.time.setText(DisplayHelper.timeFromNow(elements.get(i).deadline,-1));
         elementHolder.description.setText(elements.get(i).description);
-        if(elements.get(i).not_seen)
-            elementHolder.cv.setCardBackgroundColor(Color.parseColor("#f03498"));
+        elementHolder.title.setText(elements.get(i).title);
+        elementHolder.createdOn.setText(DisplayHelper.timeToString(elements.get(i).createdAt));
 //        elementHolder.identicon.show(elements.get(i).user_id);
 //        elementHolder.course.setText(elements.get(i).course_code);
         elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));

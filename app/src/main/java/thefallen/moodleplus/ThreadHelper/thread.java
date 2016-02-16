@@ -57,24 +57,6 @@ public class thread {
         return description;
     }
 
-    public class updatedAtComp implements Comparator<thread> {
-    @Override
-    public int compare(thread a,thread b) {
-        return -a.updatedAt.compareTo((b).getUpdatedAt());
-    }
- }
-    public class createdAtComp implements Comparator<thread> {
-    @Override
-    public int compare(thread a,thread b) {
-        return -a.createdAt.compareTo((b).getCreatedAt());
-    }
- }
-    public class courseComp implements Comparator<thread> {
-    @Override
-    public int compare(thread a,thread b) {
-        return -a.course.compareTo((b).course);
-    }
- }
     // overrides toString method when printing in logs for debugging
     public String toString() {
         return "[ userid=" + user_id +"course= "+course + ", courseid=" + course_id + ", id=" + id + ", title=" + title + ", description=" + description + ", createdat=" + createdAt + ", updatedat=" + updatedAt + "]";

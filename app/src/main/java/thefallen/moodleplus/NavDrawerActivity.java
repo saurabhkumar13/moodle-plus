@@ -3,6 +3,7 @@ package thefallen.moodleplus;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -45,13 +46,21 @@ public class NavDrawerActivity extends AppCompatActivity
     RequestQueue queue;
     ArrayList<thefallen.moodleplus.ThreadHelper.thread> threads;
     ArrayList<notification> notifications;
+    ArrayList<assignmentListItem> assignments;
+    ArrayList<grade> grades;
     Context mContext;
     RecyclerView rv;
     SharedPreferences sharedPreferences;
     NavigationView navigationView;
     ImageView logout;
     SubMenu topChannelMenu;
-    boolean currentRVThreadAdapter = true;
+    state State=state.THREADS;
+    FloatingActionButton fab;
+    String course;
+    public enum state
+    {
+        THREADS,NOTIFICATIONS,COURSE,GRADES;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +71,12 @@ public class NavDrawerActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         threads = new ArrayList<>();
-        notifications = new ArrayList<>();
         mContext = this;
-        sharedPreferences = getSharedPreferences("userData",MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE);
         queue = Volley.newRequestQueue(this);
 
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setImageDrawable(getDrawable(R.drawable.ic_create_white_48dp));
         rv = (RecyclerView) findViewById(R.id.rv);
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
@@ -97,7 +107,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 )
         );
 
-        topChannelMenu.add("Notifications").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener(){
+        topChannelMenu.add("Notifications").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.notifications(),
@@ -107,11 +117,11 @@ public class NavDrawerActivity extends AppCompatActivity
                                 notifications = new ArrayList<>();
                                 try {
                                     JSONArray notifications_json_array = ((new JSONObject(response)).getJSONArray("notifications"));
-                                    for(int i=0;i<notifications_json_array.length();i++){
+                                    for (int i = 0; i < notifications_json_array.length(); i++) {
                                         notifications.add(new notification(notifications_json_array.getJSONObject(i)));
                                     }
                                     initializeAdapter(new RVAdapterNoti(notifications));
-                                    currentRVThreadAdapter=false;
+                                    State = state.NOTIFICATIONS;
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -149,7 +159,42 @@ public class NavDrawerActivity extends AppCompatActivity
                             }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                                finish();
+                            finish();
+                        }
+                    });
+                    // Add the request to the RequestQueue.
+                    queue.add(stringRequest);
+                }
+            }
+        });
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(State == state.COURSE)
+                {
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.courseGrade(course),
+                            new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    Log.e("json", response);
+                                    grades = new ArrayList<>();
+                                    try {
+                                        JSONArray grades_json_array = ((new JSONObject(response)).getJSONArray("grades"));
+                                        for (int i = 0; i < grades_json_array.length(); i++) {
+                                            grades.add(new grade(grades_json_array.getJSONObject(i)));
+                                        }
+                                        initializeAdapter(new RVAdapterGrades(grades));
+                                        State = state.GRADES;
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            finish();
                         }
                     });
                     // Add the request to the RequestQueue.
@@ -184,7 +229,6 @@ public class NavDrawerActivity extends AppCompatActivity
     @SuppressWarnings("deprecation")
     public void initNavDrawerMenu()
     {
-        String[] code=null;
         Menu m = navigationView.getMenu();
         topChannelMenu = m.addSubMenu("Courses");
         MenuItem mi = m.getItem(m.size()-1);
@@ -198,25 +242,54 @@ public class NavDrawerActivity extends AppCompatActivity
         logout.setImageDrawable(getResources().getDrawable(R.drawable.ic_power_settings_new_white_18dp));
         navigationView.addView(logout);
 
-        JSONObject courses;
+        final JSONObject courses;
         try {
             courses = new JSONObject(getIntent().getStringExtra("json_courses"));
             JSONArray coursesList = courses.getJSONArray("courses");
-            code = new String[coursesList.length()];
+            final String[] code = new String[coursesList.length()];
             for(int i=0;i<coursesList.length();i++) {
                 code[i] = coursesList.getJSONObject(i).getString("code");
-                topChannelMenu.add(coursesList.getJSONObject(i).getString("code").toUpperCase() + ": " + coursesList.getJSONObject(i).getString("name")).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                topChannelMenu.add(0,i,0,coursesList.getJSONObject(i).getString("code").toUpperCase() + ": " + coursesList.getJSONObject(i).getString("name")).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        //TODO onClick listeners
+                        Log.e("json", item.getItemId() + "");
+                        course=code[item.getItemId()];
+                        StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.assignments(code[item.getItemId()]),
+                                new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        Log.e("json", response);
+                                        assignments = new ArrayList<>();
+                                        try {
+                                            JSONArray assignments_json_array = ((new JSONObject(response)).getJSONArray("assignments"));
+                                            for (int i = 0; i < assignments_json_array.length(); i++) {
+                                                assignments.add(new assignmentListItem(assignments_json_array.getJSONObject(i)));
+                                            }
+                                            Collections.sort(assignments);
+                                            initializeAdapter(new RVAdapterAssignments(assignments));
+                                            State = state.COURSE;
+                                            fab.setImageDrawable(getDrawable(R.drawable.ic_school_white_48dp));
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                finish();
+                            }
+                        });
+                        // Add the request to the RequestQueue.
+                        queue.add(stringRequest);
                         return false;
                     }
                 });
             }
+            getThreads(code, 0);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        getThreads(code, 0);
     }
 
     // Call all APIs for all courses threads, then sort them and show in recyclerView
@@ -263,10 +336,11 @@ public class NavDrawerActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
-        else if(!currentRVThreadAdapter)
+        else if(State!=state.THREADS)
         {
+            fab.setImageDrawable(getDrawable(R.drawable.ic_create_white_48dp));
             rv.setAdapter(new RVAdapterThreads(threads));
-            currentRVThreadAdapter=true;
+            State=state.THREADS;
         }
         else {
             super.onBackPressed();
