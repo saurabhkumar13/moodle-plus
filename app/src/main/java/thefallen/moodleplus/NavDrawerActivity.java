@@ -1,6 +1,7 @@
 package thefallen.moodleplus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -57,6 +58,7 @@ public class NavDrawerActivity extends AppCompatActivity
     state State=state.THREADS;
     FloatingActionButton fab;
     String course;
+    String[] code;
     public enum state
     {
         THREADS,NOTIFICATIONS,COURSE,GRADES;
@@ -200,6 +202,12 @@ public class NavDrawerActivity extends AppCompatActivity
                     // Add the request to the RequestQueue.
                     queue.add(stringRequest);
                 }
+                else if(State == state.THREADS && code!=null)
+                {
+                    Intent intent = new Intent(mContext,postThread.class);
+                    intent.putExtra("courses",code);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -246,7 +254,7 @@ public class NavDrawerActivity extends AppCompatActivity
         try {
             courses = new JSONObject(getIntent().getStringExtra("json_courses"));
             JSONArray coursesList = courses.getJSONArray("courses");
-            final String[] code = new String[coursesList.length()];
+            code = new String[coursesList.length()];
             for(int i=0;i<coursesList.length();i++) {
                 code[i] = coursesList.getJSONObject(i).getString("code");
                 topChannelMenu.add(0,i,0,coursesList.getJSONObject(i).getString("code").toUpperCase() + ": " + coursesList.getJSONObject(i).getString("name")).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {

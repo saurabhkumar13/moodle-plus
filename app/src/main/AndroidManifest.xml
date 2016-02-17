@@ -21,7 +21,16 @@
         <activity
             android:name=".NavDrawerActivity"
             android:label="@string/title_activity_nav_drawer"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".postThread"
+            android:label="@string/title_activity_post_thread"
+            android:parentActivityName=".NavDrawerActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="thefallen.moodleplus.NavDrawerActivity" />
+        </activity>
     </application>
 
 </manifest>

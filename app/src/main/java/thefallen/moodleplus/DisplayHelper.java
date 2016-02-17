@@ -59,8 +59,8 @@ public class DisplayHelper {
     {
         String res="";
         String[] months = new String[]{"Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"};
-        res += time.getDate() + " " + months[time.getMonth()]+" 20"+time.getYear()%100;
-        return "Posted on "+res;
+        res += time.getDate() + " " + months[time.getMonth()];
+        return res;
     }
 }
 
