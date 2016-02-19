@@ -1,9 +1,13 @@
 package thefallen.moodleplus;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,6 +39,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -99,13 +106,25 @@ public class NavDrawerActivity extends AppCompatActivity
         setItemClickListeners();
     }
     // Set onClick listeners for Notifications, Grades, Logout menu items and cards in Recycler View
+    public static final int PICKFILE_RESULT_CODE = 1;
     public void setItemClickListeners()
     {
         rv.addOnItemTouchListener(
                 new RecyclerItemClickListener(mContext, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        // TODO onClick open thread
+                        // TODO ADD TRANSITION CODES FOR THREADS AND ASSIGNMENTS HERE ~ SAURABH
+                        // TODO USE THESE IN ASSIGNMENT ACTIVITY ~ WHENEVER YOU GUYS MAKE IT
+                        // TODO CODE TO PICK AND UPLOAD A FILE
+//                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//                        intent.setType("file/*");
+//                        startActivityForResult(intent,PICKFILE_RESULT_CODE);
+                       // TODO CODE TO DOWNLOAD JUST BELOW 3 LINES...
+//                        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+//                        DownloadManager.Request request = new DownloadManager.Request(
+//                                Uri.parse("http://192.168.43.254:8000/courses/download/submissions.file_.8fb9ad3499891dba.612e747874.txt"));
+//                        dm.enqueue(request);
+
                     }
                 }
                 )
@@ -156,7 +175,6 @@ public class NavDrawerActivity extends AppCompatActivity
                                     for (int i = 0; i < grades_json_array.length(); i++) {
                                         gradesList.add(new grade(grades_json_array.getJSONObject(i),courses_json_array.getJSONObject(i)));
                                     }
-                                    Log.e("json",gradesList.toString());
                                     initializeAdapter(new RVAdapterGradesAll(toArrayList(gradesList)));
                                     State = state.NOTIFICATIONS;
                                 } catch (JSONException e) {
@@ -189,7 +207,6 @@ public class NavDrawerActivity extends AppCompatActivity
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
-                                    Log.e("json", response);
                                     finish();
                                 }
 
@@ -214,7 +231,6 @@ public class NavDrawerActivity extends AppCompatActivity
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
-                                    Log.e("json", response);
                                     grades = new ArrayList<>();
                                     try {
                                         JSONArray grades_json_array = ((new JSONObject(response)).getJSONArray("grades"));
@@ -247,7 +263,51 @@ public class NavDrawerActivity extends AppCompatActivity
         });
 
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode){
+            case PICKFILE_RESULT_CODE:
+                if(resultCode==RESULT_OK){
+                    String file = data.getData().getPath(),file2 = getRealPathFromUri(mContext,data.getData());
+                    if(!file2.equals("")) file = file2;
+                    MultipartRequest multipartRequest = new MultipartRequest(APIdetails.assignmentSubmission(1), file, "azazel",
+                            new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String s) {
+                                    Log.e("file","success");
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError volleyError) {
+                                    Log.e("file",volleyError.getLocalizedMessage());
+                                }
+                            }
+                    );
+                    queue.add(multipartRequest);
+                }
+                break;
 
+        }
+    }
+    public static String getRealPathFromUri(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } catch (NullPointerException e)
+        {
+            return "";
+        }
+        finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
     public ArrayList<ArrayList<grade>> toArrayList(ArrayList<grade> grades)
     {
         ArrayList<Integer> done_courses = new ArrayList<>();
@@ -260,7 +320,6 @@ public class NavDrawerActivity extends AppCompatActivity
             }
             res.get(done_courses.indexOf(grades.get(i).course_id)).add(grades.get(i));
         }
-        Log.e("json",res.toString());
         return res;
     }
     // Extract user name, email and id from json in bundle and set the header accordingly
@@ -309,13 +368,11 @@ public class NavDrawerActivity extends AppCompatActivity
                 topChannelMenu.add(0,i,0,coursesList.getJSONObject(i).getString("code").toUpperCase() + ": " + coursesList.getJSONObject(i).getString("name")).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        Log.e("json", item.getItemId() + "");
                         course=code[item.getItemId()];
                         StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.assignments(code[item.getItemId()]),
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
-                                        Log.e("json", response);
                                         assignments = new ArrayList<>();
                                         try {
                                             JSONArray assignments_json_array = ((new JSONObject(response)).getJSONArray("assignments"));
@@ -356,7 +413,6 @@ public class NavDrawerActivity extends AppCompatActivity
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.e("json", response);
                         try {
                             JSONArray course_threads = (new JSONObject(response)).getJSONArray("course_threads");
                             for (int i = 0; i < course_threads.length(); i++)

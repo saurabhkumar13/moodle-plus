@@ -6,39 +6,38 @@ import com.android.volley.Response;
 import com.android.volley.VolleyLog;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
 public class MultipartRequest extends Request<String> {
-    public static final String KEY_PICTURE = "mypicture";
-    public static final String KEY_PICTURE_NAME = "filename";
-    public static final String KEY_ROUTE_ID = "route_id";
 
     private HttpEntity mHttpEntity;
 
-    private String mRouteId;
+    private String fileName;
     private Response.Listener mListener;
 
-    public MultipartRequest(String url, String filePath, String routeId,
+    public MultipartRequest(String url, String filePath, String fileName,
                             Response.Listener<String> listener,
                             Response.ErrorListener errorListener) {
         super(Method.POST, url, errorListener);
 
-        mRouteId = routeId;
+        this.fileName = fileName;
         mListener = listener;
         mHttpEntity = buildMultipartEntity(filePath);
     }
 
-    public MultipartRequest(String url, File file, String routeId,
+    public MultipartRequest(String url, File file, String fileName,
                             Response.Listener<String> listener,
                             Response.ErrorListener errorListener) {
         super(Method.POST, url, errorListener);
 
-        mRouteId = routeId;
+        this.fileName = fileName;
         mListener = listener;
         mHttpEntity = buildMultipartEntity(file);
     }
@@ -52,9 +51,11 @@ public class MultipartRequest extends Request<String> {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         String fileName = file.getName();
         FileBody fileBody = new FileBody(file);
-        builder.addPart(KEY_PICTURE, fileBody);
-        builder.addTextBody(KEY_PICTURE_NAME, fileName);
-        builder.addTextBody(KEY_ROUTE_ID, mRouteId);
+        builder.addPart("sub_file", fileBody);
+        builder.addPart("_formname",new StringBody("sub_form", ContentType.APPLICATION_JSON));
+        builder.addPart("sub_name",new StringBody(fileName, ContentType.APPLICATION_JSON));
+//        builder.addTextBody("_formname", "sub_form");
+//        builder.addTextBody("sub_name", fileName);
         return builder.build();
     }
 
@@ -69,14 +70,14 @@ public class MultipartRequest extends Request<String> {
         try {
             mHttpEntity.writeTo(bos);
         } catch (IOException e) {
-            VolleyLog.e("IOException writing to ByteArrayOutputStream");
+            VolleyLog.e(e+"IOException writing to ByteArrayOutputStream");
         }
         return bos.toByteArray();
     }
 
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
-        return Response.success("Uploaded", getCacheEntry());
+        return Response.success("Uploaded"+response.statusCode, getCacheEntry());
     }
 
     @Override

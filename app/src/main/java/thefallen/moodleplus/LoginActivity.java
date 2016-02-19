@@ -115,7 +115,6 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.e("json",response);
                         try {
                             if((new JSONObject(response)).getBoolean("success"))
                             {intent = new Intent(mContext, NavDrawerActivity.class);
@@ -171,7 +170,6 @@ public class LoginActivity extends AppCompatActivity {
                     if(response.equals("{}\n")) errorSnack(R.string.error,true);
                     else {
                         intent.putExtra("json_courses", response);
-                        Log.e("json", "("+response+")");
                         startActivity(intent);
                     }
                     }
