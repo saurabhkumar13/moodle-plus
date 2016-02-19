@@ -1,10 +1,7 @@
 package thefallen.moodleplus;
 
-/**
- * Created by saurabh on 11/2/16.
- */
 public class APIdetails {
-    static private String host = "http://10.0.0.16:8080";
+    static private String host = "http://192.168.43.254:8000";
     public static String login()
     {
         return host+"/default/login.json";

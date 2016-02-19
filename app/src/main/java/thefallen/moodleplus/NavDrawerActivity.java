@@ -142,6 +142,39 @@ public class NavDrawerActivity extends AppCompatActivity
                 return false;
             }
         });
+        topChannelMenu.add("Grades").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.grades(),
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                ArrayList gradesList = new ArrayList<>();
+                                try {
+                                    JSONArray grades_json_array = ((new JSONObject(response)).getJSONArray("grades"));
+                                    JSONArray courses_json_array = ((new JSONObject(response)).getJSONArray("courses"));
+                                    for (int i = 0; i < grades_json_array.length(); i++) {
+                                        gradesList.add(new grade(grades_json_array.getJSONObject(i),courses_json_array.getJSONObject(i)));
+                                    }
+                                    Log.e("json",gradesList.toString());
+                                    initializeAdapter(new RVAdapterGradesAll(toArrayList(gradesList)));
+                                    State = state.NOTIFICATIONS;
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        finish();
+                    }
+                });
+                // Add the request to the RequestQueue.
+                queue.add(stringRequest);
+                return false;
+            }
+        });
         topChannelMenu.add("");
 
         logout.setOnClickListener(new View.OnClickListener() {
@@ -215,7 +248,21 @@ public class NavDrawerActivity extends AppCompatActivity
 
     }
 
-
+    public ArrayList<ArrayList<grade>> toArrayList(ArrayList<grade> grades)
+    {
+        ArrayList<Integer> done_courses = new ArrayList<>();
+        ArrayList<ArrayList<grade>> res = new ArrayList<>();
+        for(int i=0;i<grades.size();i++)
+        {
+            if(!done_courses.contains(grades.get(i).course_id)) {
+                res.add(new ArrayList<grade>());
+                done_courses.add(grades.get(i).course_id);
+            }
+            res.get(done_courses.indexOf(grades.get(i).course_id)).add(grades.get(i));
+        }
+        Log.e("json",res.toString());
+        return res;
+    }
     // Extract user name, email and id from json in bundle and set the header accordingly
     public void initNavDrawerHeader()
     {
