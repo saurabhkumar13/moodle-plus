@@ -336,6 +336,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
     // Initialize cards to display
     private void initializeAdapter(RecyclerView.Adapter adapter){
+        invalidateOptionsMenu();
         rv.setAdapter(adapter);
     }
     @Override
@@ -355,8 +356,8 @@ public class NavDrawerActivity extends AppCompatActivity
         else if(State!=state.THREADS)
         {
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
-            rv.setAdapter(new RVAdapterThreads(threads));
             State=state.THREADS;
+            initializeAdapter(new RVAdapterThreads(threads));
         }
         else {
             super.onBackPressed();
@@ -366,10 +367,13 @@ public class NavDrawerActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.nav_drawer, menu);
+        if(State == state.THREADS) getMenuInflater().inflate(R.menu.nav_drawer, menu);
         return true;
     }
-
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return State == state.THREADS &&  super.onPrepareOptionsMenu(menu);
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
