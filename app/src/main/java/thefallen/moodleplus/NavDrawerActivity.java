@@ -38,6 +38,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import thefallen.moodleplus.ThreadHelper.courseComp;
+import thefallen.moodleplus.ThreadHelper.createdAtComp;
 import thefallen.moodleplus.ThreadHelper.updatedAtComp;
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
@@ -59,6 +61,7 @@ public class NavDrawerActivity extends AppCompatActivity
     FloatingActionButton fab;
     String course;
     String[] code;
+    int[] order = new int[]{-1,-1,1};
     public enum state
     {
         THREADS,NOTIFICATIONS,COURSE,GRADES;
@@ -72,13 +75,12 @@ public class NavDrawerActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        threads = new ArrayList<>();
         mContext = this;
         sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE);
         queue = Volley.newRequestQueue(this);
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setImageDrawable(getDrawable(R.drawable.ic_create_white_48dp));
+        fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
         rv = (RecyclerView) findViewById(R.id.rv);
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
@@ -276,7 +278,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                             Collections.sort(assignments);
                                             initializeAdapter(new RVAdapterAssignments(assignments));
                                             State = state.COURSE;
-                                            fab.setImageDrawable(getDrawable(R.drawable.ic_school_white_48dp));
+                                            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
@@ -294,7 +296,6 @@ public class NavDrawerActivity extends AppCompatActivity
                     }
                 });
             }
-            getThreads(code, 0);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -304,7 +305,6 @@ public class NavDrawerActivity extends AppCompatActivity
     public void getThreads(final String[] code,final int in)
     {
         String url = APIdetails.coursesThreads(code[in]);
-        Log.e("json",url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -312,12 +312,14 @@ public class NavDrawerActivity extends AppCompatActivity
                         Log.e("json", response);
                         try {
                             JSONArray course_threads = (new JSONObject(response)).getJSONArray("course_threads");
-                            for(int i=0;i<course_threads.length();i++) threads.add(new thefallen.moodleplus.ThreadHelper.thread(course_threads.getJSONObject(i),code[in]));
-                        } catch (JSONException e) {
+                            for (int i = 0; i < course_threads.length(); i++)
+                                threads.add(new thefallen.moodleplus.ThreadHelper.thread(course_threads.getJSONObject(i), code[in]));
+                            } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         if(in<code.length-1) getThreads(code,in+1);
                         else    {
+                            Collections.sort(threads,new updatedAtComp(-1));
                             initializeAdapter(new RVAdapterThreads(threads));
                         }
 
@@ -336,7 +338,13 @@ public class NavDrawerActivity extends AppCompatActivity
     private void initializeAdapter(RecyclerView.Adapter adapter){
         rv.setAdapter(adapter);
     }
-
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        threads = new ArrayList<>();
+        getThreads(code, 0);
+    }
 
     @Override
     public void onBackPressed() {
@@ -346,7 +354,7 @@ public class NavDrawerActivity extends AppCompatActivity
         }
         else if(State!=state.THREADS)
         {
-            fab.setImageDrawable(getDrawable(R.drawable.ic_create_white_48dp));
+            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
             rv.setAdapter(new RVAdapterThreads(threads));
             State=state.THREADS;
         }
@@ -370,11 +378,25 @@ public class NavDrawerActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Collections.sort(threads, new updatedAtComp(-1));
+        if (id == R.id.created) {
+            Collections.sort(threads, new createdAtComp(order[0]));
             initializeAdapter(new RVAdapterThreads(threads));
+            order[0]*=-1;
             return true;
         }
+        else if (id == R.id.updated) {
+            Collections.sort(threads, new updatedAtComp(order[1]));
+            initializeAdapter(new RVAdapterThreads(threads));
+            order[1]*=-1;
+            return true;
+        }
+        else if (id == R.id.course) {
+            Collections.sort(threads, new courseComp(order[2]));
+            initializeAdapter(new RVAdapterThreads(threads));
+            order[2]*=-1;
+            return true;
+        }
+
 
         return super.onOptionsItemSelected(item);
     }
