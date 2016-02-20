@@ -545,7 +545,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
                             thread_views.clear();
                             thread head = threads.get(position);
-                            thread_views.add(new thread_view(head.getUser_id(),head.getDescription(),head.getTime(),head.getTitle()));
+                            thread_views.add(new thread_view(-head.getUser_id(),head.getDescription(),head.getTime(),head.getTitle()));
                             for (int i = 0; i<comments.length();i++){
                                 comment[i] = comments.getJSONObject(i).getString("description");
                                 createdAt[i] = times.getString(i).replace(".","");

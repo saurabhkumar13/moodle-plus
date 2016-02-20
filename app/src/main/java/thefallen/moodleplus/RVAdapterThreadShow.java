@@ -60,19 +60,26 @@ public class RVAdapterThreadShow extends RecyclerView.Adapter<RVAdapterThreadSho
     }
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
-        if(i==0){
+        if(elements.get(i).getUser_id()<0){
             elementHolder.cv.setCardBackgroundColor(Color.parseColor("#3F51B5"));
             elementHolder.name.setTextColor(Color.parseColor("#dddddd"));
             elementHolder.time.setTextColor(Color.parseColor("#dddddd"));
             elementHolder.comment.setTextColor(Color.parseColor("#dddddd"));
         }
+        else{
+            elementHolder.cv.setCardBackgroundColor(Color.parseColor("#fafafa"));
+            elementHolder.name.setTextColor(Color.parseColor("#777777"));
+            elementHolder.time.setTextColor(Color.parseColor("#777777"));
+            elementHolder.comment.setTextColor(Color.parseColor("#777777"));
+        }
         elementHolder.name.setText(elements.get(i).getUser_name());
         elementHolder.comment.setText(elements.get(i).getComment());
-        elementHolder.identicon.show(elements.get(i).getUser_id());
+        if (elements.get(i).getUser_id() < 0) elementHolder.identicon.show(-elements.get(i).getUser_id());
+        else elementHolder.identicon.show(elements.get(i).getUser_id());
         elementHolder.time.setText(elements.get(i).getCreatedAt());
         elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
         elementHolder.cv.animate()
-                .setStartDelay((i+1) * 200)
+                .setStartDelay((i+1) * 100)
                 .translationXBy(DisplayHelper.getWidth(context))
                 .setInterpolator(new OvershootInterpolator())
                 .setDuration(600)
