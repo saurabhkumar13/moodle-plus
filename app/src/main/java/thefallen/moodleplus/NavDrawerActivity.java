@@ -48,6 +48,7 @@ import java.util.Collections;
 
 import thefallen.moodleplus.ThreadHelper.courseComp;
 import thefallen.moodleplus.ThreadHelper.createdAtComp;
+import thefallen.moodleplus.ThreadHelper.thread;
 import thefallen.moodleplus.ThreadHelper.updatedAtComp;
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
@@ -465,18 +466,17 @@ public class NavDrawerActivity extends AppCompatActivity
                             for (int i = 0; i < comment_users.length(); i++){
                                 user_id[i] = comment_users.getJSONObject(i).getInt("id");
                                 user_name[i] = comment_users.getJSONObject(i).getString("first_name")+" " +comment_users.getJSONObject(i).getString("last_name");
-                                Log.e("userdets",user_id[i]+"//"+user_name[i]);
                             }
 
                             thread_views.clear();
+                            thread head = threads.get(position);
+                            thread_views.add(new thread_view(head.getUser_id(),head.getDescription(),head.getTime(),head.getTitle()));
                             for (int i = 0; i<comments.length();i++){
                                 comment[i] = comments.getJSONObject(i).getString("description");
-                                createdAt[i] = times.getString(i);
+                                createdAt[i] = times.getString(i).replace(".","");
                                 int userIdinComment = comments.getJSONObject(i).getInt("user_id");
-                                Log.e("test",userIdinComment+"");
                                 for(int j=0;j<comment_users.length();j++){
                                     if(userIdinComment==user_id[j]){
-                                        Log.e("adds", userIdinComment + comment[i] + createdAt[i] + user_name[j]);
                                         thread_views.add(new thread_view(userIdinComment, comment[i], createdAt[i], user_name[j]));
                                         break;
                                     }
@@ -487,8 +487,7 @@ public class NavDrawerActivity extends AppCompatActivity
                             e.printStackTrace();
                         }
                         if(thread_views!=null){
-                            Log.e("threadnum",thread_views.size()+"");
-                            initializeAdapter(new RVAdapterThreadShow(thread_views, threads.get(position)));
+                            initializeAdapter(new RVAdapterThreadShow(thread_views));
                             State=state.COMMENTS;
                         }
                     }

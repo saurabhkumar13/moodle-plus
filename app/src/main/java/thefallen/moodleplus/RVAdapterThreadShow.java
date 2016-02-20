@@ -36,9 +36,8 @@ public class RVAdapterThreadShow extends RecyclerView.Adapter<RVAdapterThreadSho
     }
 
     List<thread_view> elements;
-    thread header;
     Context context;
-    RVAdapterThreadShow(List<thread_view> elements,thread header){
+    RVAdapterThreadShow(List<thread_view> elements){
         this.elements = elements;
     }
     @Override
@@ -68,7 +67,7 @@ public class RVAdapterThreadShow extends RecyclerView.Adapter<RVAdapterThreadSho
         elementHolder.course.setText(elements.get(i).getCreatedAt());
         elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
         elementHolder.cv.animate()
-                .setStartDelay(i * 200)
+                .setStartDelay((i+1) * 200)
                 .translationXBy(DisplayHelper.getWidth(context))
                 .setInterpolator(new OvershootInterpolator())
                 .setDuration(600)
