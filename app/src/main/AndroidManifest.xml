@@ -26,8 +26,7 @@
         <activity
             android:name=".postThread"
             android:label="@string/title_activity_post_thread"
-            android:theme="@style/AppTheme">
-        </activity>
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

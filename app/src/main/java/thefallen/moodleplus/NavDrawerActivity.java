@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -55,6 +56,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
     RequestQueue queue;
     ArrayList<thefallen.moodleplus.ThreadHelper.thread> threads;
+    ArrayList<thefallen.moodleplus.thread_view> thread_views;
     ArrayList<notification> notifications;
     ArrayList<assignmentListItem> assignments;
     ArrayList<grade> grades;
@@ -71,7 +73,7 @@ public class NavDrawerActivity extends AppCompatActivity
     int[] order = new int[]{-1,-1,1};
     public enum state
     {
-        THREADS,NOTIFICATIONS,COURSE,GRADES;
+        THREADS,NOTIFICATIONS,COURSE,GRADES,COMMENTS;
     }
 
     @Override
@@ -113,6 +115,11 @@ public class NavDrawerActivity extends AppCompatActivity
                 new RecyclerItemClickListener(mContext, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
+                        if(State==state.THREADS){
+                            Log.e("thread","yup");
+                            int thread_id = threads.get(position).getThread_id();
+                            getThreadView(thread_id,position);
+                        }
                         // TODO ADD TRANSITION CODES FOR THREADS AND ASSIGNMENTS HERE ~ SAURABH
                         // TODO USE THESE IN ASSIGNMENT ACTIVITY ~ WHENEVER YOU GUYS MAKE IT
                         // TODO CODE TO PICK AND UPLOAD A FILE
@@ -253,7 +260,7 @@ public class NavDrawerActivity extends AppCompatActivity
                     // Add the request to the RequestQueue.
                     queue.add(stringRequest);
                 }
-                else if(State == state.THREADS && code!=null)
+                else if((State == state.THREADS|| State == state.COMMENTS) && code!=null)
                 {
                     Intent intent = new Intent(mContext,postThread.class);
                     intent.putExtra("courses",code);
@@ -420,7 +427,7 @@ public class NavDrawerActivity extends AppCompatActivity
                             } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        if(in<code.length-1) getThreads(code,in+1);
+                        if(in<code.length-1) getThreads(code, in + 1);
                         else    {
                             Collections.sort(threads,new updatedAtComp(-1));
                             initializeAdapter(new RVAdapterThreads(threads));
@@ -437,6 +444,65 @@ public class NavDrawerActivity extends AppCompatActivity
         queue.add(stringRequest);
     }
 
+    public void getThreadView(final int id, final int position)
+    {
+        String url = APIdetails.thread(id);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+
+                            JSONArray comments = (new JSONObject(response)).getJSONArray("comments");
+                            JSONArray comment_users = (new JSONObject(response)).getJSONArray("comment_users");
+                            JSONArray times = (new JSONObject(response)).getJSONArray("times_readable");
+
+                            int[] user_id = new int[comment_users.length()];
+                            String[] user_name = new String[comment_users.length()];
+                            String[] comment = new String[comments.length()];
+                            String[] createdAt = new String[comments.length()];
+
+                            for (int i = 0; i < comment_users.length(); i++){
+                                user_id[i] = comment_users.getJSONObject(i).getInt("id");
+                                user_name[i] = comment_users.getJSONObject(i).getString("first_name")+" " +comment_users.getJSONObject(i).getString("last_name");
+                                Log.e("userdets",user_id[i]+"//"+user_name[i]);
+                            }
+
+                            thread_views.clear();
+                            for (int i = 0; i<comments.length();i++){
+                                comment[i] = comments.getJSONObject(i).getString("description");
+                                createdAt[i] = times.getString(i);
+                                int userIdinComment = comments.getJSONObject(i).getInt("user_id");
+                                Log.e("test",userIdinComment+"");
+                                for(int j=0;j<comment_users.length();j++){
+                                    if(userIdinComment==user_id[j]){
+                                        Log.e("adds", userIdinComment + comment[i] + createdAt[i] + user_name[j]);
+                                        thread_views.add(new thread_view(userIdinComment, comment[i], createdAt[i], user_name[j]));
+                                        break;
+                                    }
+                                }
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if(thread_views!=null){
+                            Log.e("threadnum",thread_views.size()+"");
+                            initializeAdapter(new RVAdapterThreadShow(thread_views, threads.get(position)));
+                            State=state.COMMENTS;
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(mContext,"thread load error",Toast.LENGTH_LONG).show();
+                Log.e("threadloaderror","threadloaderror");
+            }
+        });
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
+
     // Initialize cards to display
     private void initializeAdapter(RecyclerView.Adapter adapter){
         invalidateOptionsMenu();
@@ -447,6 +513,7 @@ public class NavDrawerActivity extends AppCompatActivity
     {
         super.onResume();
         threads = new ArrayList<>();
+        thread_views = new ArrayList<>();
         getThreads(code, 0);
     }
 

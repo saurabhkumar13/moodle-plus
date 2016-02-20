@@ -45,6 +45,8 @@ public class thread {
         return course;
     }
 
+    public int getThread_id(){return id;}
+
     public int getUser_id() {
         return user_id;
     }
