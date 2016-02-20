@@ -40,12 +40,11 @@ public class RVAdapterThreadShow extends RecyclerView.Adapter<RVAdapterThreadSho
     RVAdapterThreadShow(List<thread_view> elements){
         this.elements = elements;
     }
+
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
     }
-
-
 
     @Override
     public ElementHolder onCreateViewHolder(ViewGroup viewGroup, int i) {

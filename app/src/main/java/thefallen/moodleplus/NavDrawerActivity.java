@@ -1,6 +1,5 @@
 package thefallen.moodleplus;
 
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,14 +24,19 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -40,11 +45,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import thefallen.moodleplus.ThreadHelper.courseComp;
 import thefallen.moodleplus.ThreadHelper.createdAtComp;
@@ -58,6 +62,7 @@ public class NavDrawerActivity extends AppCompatActivity
     RequestQueue queue;
     ArrayList<thefallen.moodleplus.ThreadHelper.thread> threads;
     ArrayList<thefallen.moodleplus.thread_view> thread_views;
+    int currentThread;
     ArrayList<notification> notifications;
     ArrayList<assignmentListItem> assignments;
     ArrayList<grade> grades;
@@ -233,8 +238,12 @@ public class NavDrawerActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(State == state.COURSE)
-                {
+                if (State == state.COMMENTS) {
+                    EditText edit = (EditText) findViewById(R.id.comment);
+                    Log.e("nyest",edit.getText().toString()+ currentThread +"");
+                    PostComment(currentThread + "",edit.getText().toString());
+                }
+                if (State == state.COURSE) {
                     StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.courseGrade(course),
                             new Response.Listener<String>() {
                                 @Override
@@ -260,17 +269,83 @@ public class NavDrawerActivity extends AppCompatActivity
                     });
                     // Add the request to the RequestQueue.
                     queue.add(stringRequest);
-                }
-                else if((State == state.THREADS|| State == state.COMMENTS) && code!=null)
-                {
-                    Intent intent = new Intent(mContext,postThread.class);
-                    intent.putExtra("courses",code);
+                } else if ((State == state.THREADS) && code != null) {
+                    Intent intent = new Intent(mContext, postThread.class);
+                    intent.putExtra("courses", code);
                     startActivity(intent);
                 }
             }
         });
 
     }
+
+    void errorSnack(int strID,boolean retry, final String thread_id, final String description)
+    {
+        Snackbar snackbar = Snackbar.make(fab,strID,Snackbar.LENGTH_SHORT);
+        if(retry) snackbar.setAction("RETRY", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PostComment(thread_id,description);
+            }
+        });
+        snackbar.show();
+    }
+    public void PostComment(final String thread_id,final String description)
+    {
+        String url = APIdetails.comment();
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.e("commentresponse", response);
+                        try {
+                            if((new JSONObject(response)).getBoolean("success"))
+                            {
+                                // to add
+                            }
+                            else errorSnack(R.string.error,false,thread_id,description);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                // Error handling
+                volleyError.printStackTrace();
+
+                if(volleyError instanceof NoConnectionError) {
+                    errorSnack(R.string.no_internet,true,thread_id,description);
+                } else if (volleyError instanceof TimeoutError) {
+                    errorSnack(R.string.timeout,true,thread_id,description);
+                } else if (volleyError instanceof ServerError) {
+                    errorSnack(R.string.internal_server,true,thread_id,description);
+                }
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String,String> params = new HashMap<>();
+                params.put("thread_id",thread_id);
+                params.put("description", description);
+                return params;
+
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String,String> params = new HashMap<>();
+                params.put("Content-Type","application/x-www-form-urlencoded");
+                return params;
+            }
+        };
+
+        // Add the request to the queue
+        queue.add(stringRequest);
+
+    }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode){
@@ -452,8 +527,8 @@ public class NavDrawerActivity extends AppCompatActivity
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        currentThread =id;
                         try {
-
                             JSONArray comments = (new JSONObject(response)).getJSONArray("comments");
                             JSONArray comment_users = (new JSONObject(response)).getJSONArray("comment_users");
                             JSONArray times = (new JSONObject(response)).getJSONArray("times_readable");
@@ -487,6 +562,7 @@ public class NavDrawerActivity extends AppCompatActivity
                             e.printStackTrace();
                         }
                         if(thread_views!=null){
+                            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_send_white_36dp));
                             initializeAdapter(new RVAdapterThreadShow(thread_views));
                             State=state.COMMENTS;
                         }
