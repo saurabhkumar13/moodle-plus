@@ -27,6 +27,7 @@
         android:paddingTop="?attr/actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="100dp"
         android:clipToPadding="false"/>
 
     <EditText
