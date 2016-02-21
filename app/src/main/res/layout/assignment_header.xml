@@ -53,7 +53,7 @@
                     android:paddingLeft="16dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/title"
+                    android:id="@+id/fileName"
                     android:textStyle="bold"
                     android:layout_alignParentTop="true"
                     android:textSize="24sp"
@@ -65,7 +65,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/timeLeft"
+            android:id="@+id/time"
             android:paddingTop="8dp"
             android:paddingLeft="16dp"
             android:text="12 days 13 hours 10 minutes left"

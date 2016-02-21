@@ -11,11 +11,13 @@ import java.sql.Timestamp;
  * Created by root on 2/16/16.
  */
 public class assignmentListItem implements Comparable{
+    int id;
     String title,description;
     Timestamp createdAt=null,deadline=null;
     public assignmentListItem(JSONObject jsonObject)
     {
         try {
+            id = jsonObject.getInt("id");
             description = jsonObject.getString("description");
             title = jsonObject.getString("name");
             createdAt = Timestamp.valueOf(jsonObject.getString("created_at"));
@@ -24,6 +26,12 @@ public class assignmentListItem implements Comparable{
             description=title="";
         }
     }
+
+    public int getassgnId()
+    {
+        return id;
+    }
+
     @Override
     public int compareTo(Object t)
     {

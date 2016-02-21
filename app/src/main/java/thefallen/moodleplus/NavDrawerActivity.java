@@ -73,8 +73,12 @@ public class NavDrawerActivity extends AppCompatActivity
     RequestQueue queue;
     ArrayList<thefallen.moodleplus.ThreadHelper.thread> threads;
     ArrayList<thefallen.moodleplus.thread_view> thread_views;
+    ArrayList<thefallen.moodleplus.assignment_view> assignment_views;
     int currentThreadid;
     int currentThreadpos;
+    int currentAssgnId;
+    int currentAssgnpos;
+    assignment_header ah;
     ArrayList<notification> notifications;
     ArrayList<assignmentListItem> assignments;
     ArrayList<grade> grades;
@@ -93,7 +97,7 @@ public class NavDrawerActivity extends AppCompatActivity
     AppBarLayout mToolbarContainer;
     public enum state
     {
-        THREADS,NOTIFICATIONS,COURSE,GRADES,COMMENTS,GRADESALL
+        THREADS,NOTIFICATIONS,COURSE,GRADES,COMMENTS,GRADESALL,SUBMISSIONS
     }
 
     @Override
@@ -137,6 +141,9 @@ public class NavDrawerActivity extends AppCompatActivity
     {
         rv.addOnItemTouchListener(
                 new RecyclerItemClickListener(mContext, new RecyclerItemClickListener.OnItemClickListener() {
+
+                    @Override
+                    public void onItemClick(View view, int position,boolean left) {}
                     @Override
                     public void onItemClick(View view, int position) {
                         if (getState() == state.THREADS) {
@@ -148,7 +155,8 @@ public class NavDrawerActivity extends AppCompatActivity
                         if (getState() == state.COURSE)
                         {
                             Log.e("course","yolo");
-
+                            int assgn_id = assignments.get(position).getassgnId();
+                            getAssgnView(assgn_id,position);
                         }
                         // TODO ADD TRANSITION CODES FOR THREADS AND ASSIGNMENTS HERE ~ SAURABH
                         // TODO USE THESE IN ASSIGNMENT ACTIVITY ~ WHENEVER YOU GUYS MAKE IT
@@ -641,6 +649,43 @@ public class NavDrawerActivity extends AppCompatActivity
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
+
+    public void getAssgnView(final int id, final int position)
+    {
+        String url = APIdetails.assignment(id);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        currentAssgnId = id;
+                        currentAssgnpos = position;
+                        try {
+                            JSONObject jsobj = new JSONObject(response);
+                            ah = new assignment_header(jsobj.getJSONObject("assignment"),jsobj.getJSONObject("registered"),jsobj.getJSONObject("course"));
+                            JSONArray submissions = jsobj.getJSONArray("submissions");
+                            assignment_views = new ArrayList<>();
+                            for (int i = 0; i < submissions.length(); i++) {
+                                JSONObject obji = submissions.getJSONObject(i);
+                                assignment_views.add(new assignment_view(obji.getInt("id"), obji.getString("name"), Timestamp.valueOf(obji.getString("created_at")), obji.getString("file_")));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if (assignment_views!= null) {
+                            initializeAdapter(new RVAdapterAssgnShow(ah,assignment_views));
+                            changeState(state.SUBMISSIONS);
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Assignmentloaderror",error.getLocalizedMessage());
+            }
+        });
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
+
 
     // Initialize cards to display
     private void initializeAdapter(RecyclerView.Adapter adapter){
