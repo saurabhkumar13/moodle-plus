@@ -6,47 +6,84 @@
     android.support.v7.cardview:cardElevation="5dp"
     android:layout_margin="5dp"
     android:id="@+id/cv"
-    android.support.v7.cardview:cardCornerRadius="0dp"
     >
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ass_head">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <View
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/circle"
+                    android:layout_gravity="center"
+                    android:clipChildren="true"
+                    android:clipToPadding="true"
+                    />
+                <thefallen.moodleplus.identicons.SymmetricIdenticon
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:id="@+id/identicon"
+                    android:layout_margin="16dp"
+                    />
+            </FrameLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <TextView
+                    android:padding="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/course"
+                    android:gravity="end"
+                    android:text="COP290"
+                    />
+                <TextView
+                    android:paddingTop="24dp"
+                    android:paddingLeft="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/title"
+                    android:textStyle="bold"
+                    android:layout_alignParentTop="true"
+                    android:textSize="24sp"
+                    android:text = "Assignment 1: moodle plus"
+                    />
+
+            </RelativeLayout>
+        </LinearLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:padding="16dp"
-            android:id="@+id/title"
-            />
-        <TextView
-            android:textSize="12sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:layout_alignParentRight="true"
-            android:id="@+id/time"
-            />
-        <TextView
-            android:textSize="12sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/timeLeft"
+            android:paddingTop="8dp"
             android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:layout_below="@+id/title"
-            android:id="@+id/createdOn"
+            android:text="12 days 13 hours 10 minutes left"
+            android:layout_below="@+id/ass_head"
             />
         <TextView
-            android:textSize="16sp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:paddingLeft="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingBottom="16dp"
-            android:layout_below="@+id/createdOn"
             android:id="@+id/description"
+            android:textSize="16sp"
+            android:maxLines="5"
+            android:text = "This is a test assignment description i just wanna test this stuff out once"
+            android:layout_below="@+id/timeLeft"
             />
 
     </RelativeLayout>
+
 </android.support.v7.widget.CardView>
