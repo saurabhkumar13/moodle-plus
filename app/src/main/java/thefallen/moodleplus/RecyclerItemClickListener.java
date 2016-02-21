@@ -1,7 +1,9 @@
 package thefallen.moodleplus;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,6 +13,7 @@ public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListen
 
     public interface OnItemClickListener {
         public void onItemClick(View view, int position);
+        public void onItemClick(View view,int position,boolean leftSide);
     }
 
     GestureDetector mGestureDetector;
@@ -32,8 +35,11 @@ public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListen
     @Override
     public boolean onInterceptTouchEvent(RecyclerView view, MotionEvent e) {
         View childView = view.findChildViewUnder(e.getX(), e.getY());
+        Log.e("rv",childView.getWidth()+" "+childView.getHeight());
+        boolean left = e.getX() < childView.getWidth()/2;
         if (childView != null && mListener != null && mGestureDetector.onTouchEvent(e)) {
             mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
+            mListener.onItemClick(childView, view.getChildAdapterPosition(childView),left);
         }
         return false;
     }
