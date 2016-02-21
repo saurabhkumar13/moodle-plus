@@ -1,5 +1,7 @@
 package thefallen.moodleplus;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +15,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SubMenu;
 import android.view.View;
@@ -25,6 +28,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -64,7 +70,8 @@ public class NavDrawerActivity extends AppCompatActivity
     RequestQueue queue;
     ArrayList<thefallen.moodleplus.ThreadHelper.thread> threads;
     ArrayList<thefallen.moodleplus.thread_view> thread_views;
-    int currentThread;
+    int currentThreadid;
+    int currentThreadpos;
     ArrayList<notification> notifications;
     ArrayList<assignmentListItem> assignments;
     ArrayList<grade> grades;
@@ -78,11 +85,12 @@ public class NavDrawerActivity extends AppCompatActivity
     FloatingActionButton fab;
     String course;
     String[] code;
+    EditText comment;
     int[] order = new int[]{-1,-1,1};
     AppBarLayout mToolbarContainer;
     public enum state
     {
-        THREADS,NOTIFICATIONS,COURSE,GRADES,COMMENTS
+        THREADS,NOTIFICATIONS,COURSE,GRADES,COMMENTS,GRADESALL
     }
 
     @Override
@@ -98,8 +106,11 @@ public class NavDrawerActivity extends AppCompatActivity
         sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE);
         queue = Volley.newRequestQueue(this);
 
+        comment = (EditText)findViewById(R.id.comment);
+
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
+
         rv = (RecyclerView) findViewById(R.id.rv);
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
@@ -125,10 +136,10 @@ public class NavDrawerActivity extends AppCompatActivity
                 new RecyclerItemClickListener(mContext, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        if(getState()==state.THREADS){
-                            Log.e("thread","yup");
+                        if (getState() == state.THREADS) {
+                            Log.e("thread", "yup");
                             int thread_id = threads.get(position).getThread_id();
-                            getThreadView(thread_id,position);
+                            getThreadView(thread_id, position);
                         }
                         // TODO ADD TRANSITION CODES FOR THREADS AND ASSIGNMENTS HERE ~ SAURABH
                         // TODO USE THESE IN ASSIGNMENT ACTIVITY ~ WHENEVER YOU GUYS MAKE IT
@@ -136,7 +147,7 @@ public class NavDrawerActivity extends AppCompatActivity
 //                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 //                        intent.setType("file/*");
 //                        startActivityForResult(intent,PICKFILE_RESULT_CODE);
-                       // TODO CODE TO DOWNLOAD JUST BELOW 3 LINES...
+                        // TODO CODE TO DOWNLOAD JUST BELOW 3 LINES...
 //                        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 //                        DownloadManager.Request request = new DownloadManager.Request(
 //                                Uri.parse("http://192.168.43.254:8000/courses/download/submissions.file_.8fb9ad3499891dba.612e747874.txt"));
@@ -190,7 +201,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                     JSONArray grades_json_array = ((new JSONObject(response)).getJSONArray("grades"));
                                     JSONArray courses_json_array = ((new JSONObject(response)).getJSONArray("courses"));
                                     for (int i = 0; i < grades_json_array.length(); i++) {
-                                        gradesList.add(new grade(grades_json_array.getJSONObject(i),courses_json_array.getJSONObject(i)));
+                                        gradesList.add(new grade(grades_json_array.getJSONObject(i), courses_json_array.getJSONObject(i)));
                                     }
                                     initializeAdapter(new RVAdapterGradesAll(toArrayList(gradesList)));
                                     changeState(state.NOTIFICATIONS);
@@ -243,9 +254,7 @@ public class NavDrawerActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (getState() == state.COMMENTS) {
-                    EditText edit = (EditText) findViewById(R.id.comment);
-                    Log.e("nyest", edit.getText().toString() + currentThread + "");
-                    PostComment(currentThread + "", edit.getText().toString());
+                    PostComment(currentThreadid + "", comment.getText().toString());
                 }
                 if (getState() == state.COURSE) {
                     StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.courseGrade(course),
@@ -273,14 +282,14 @@ public class NavDrawerActivity extends AppCompatActivity
                     });
                     // Add the request to the RequestQueue.
                     queue.add(stringRequest);
-                } else if ((getState () == state.THREADS) && code != null) {
+                } else if ((getState() == state.THREADS) && code != null) {
                     Intent intent = new Intent(mContext, postThread.class);
                     intent.putExtra("courses", code);
                     startActivity(intent);
                 }
             }
         });
-        rv.addOnScrollListener(new HidingScrollListener(getStatusBarHeight()+DisplayHelper.getHeight(mContext)) {
+        rv.addOnScrollListener(new HidingScrollListener(getStatusBarHeight() + DisplayHelper.getToolbarHeight(mContext)) {
             @Override
             public void onMoved(int distance) {
                 mToolbarContainer.setTranslationY(-distance);
@@ -302,9 +311,44 @@ public class NavDrawerActivity extends AppCompatActivity
     }
 
     void changeState(state STATE) {
-        if(STATE == state.COMMENTS) findViewById(R.id.comment).setVisibility(View.VISIBLE);
-        else findViewById(R.id.comment).setVisibility(View.GONE);
+        if(STATE == state.COMMENTS) {
+            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_send_white_36dp));
+            comment.setVisibility(View.VISIBLE);
+            comment.setX(DisplayHelper.dpToPx(20,mContext)+DisplayHelper.getWidth(mContext));
+            comment.animate()
+                    .translationXBy(-DisplayHelper.getWidth(mContext))
+                    .setDuration(300)
+                    .setInterpolator(new AccelerateDecelerateInterpolator());
+        }
+        else {
+            comment.animate()
+                    .translationXBy(DisplayHelper.getWidth(mContext))
+                    .setDuration(300)
+                    .setInterpolator(new AccelerateDecelerateInterpolator());
+//            comment.setVisibility(View.GONE);
+        }
+        if(STATE == state.COURSE)
+            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
+        else if(STATE == state.THREADS)
+            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
+        if(noFabStates(State)&&!noFabStates(STATE))
+            fab.animate()
+                .scaleX(1)
+                .scaleY(1)
+                .setStartDelay(300)
+                .setInterpolator(new OvershootInterpolator(3));
+        else if(!noFabStates(State)&&noFabStates(STATE))
+            fab.animate()
+                .scaleX(0)
+                .scaleY(0)
+                .setStartDelay(300)
+                .setInterpolator(new AnticipateInterpolator(3));
         State = STATE;
+    }
+
+    boolean noFabStates(state STATE)
+    {
+        return STATE == state.GRADES ||STATE == state.GRADESALL ||STATE == state.NOTIFICATIONS;
     }
     void errorSnack(int strID,boolean retry, final String thread_id, final String description)
     {
@@ -328,7 +372,8 @@ public class NavDrawerActivity extends AppCompatActivity
                         try {
                             if((new JSONObject(response)).getBoolean("success"))
                             {
-                                // to add
+                                comment.setText("");
+                                getThreadView(currentThreadid,currentThreadpos);
                             }
                             else errorSnack(R.string.error,false,thread_id,description);
                         } catch (JSONException e) {
@@ -492,7 +537,6 @@ public class NavDrawerActivity extends AppCompatActivity
                                             Collections.sort(assignments);
                                             initializeAdapter(new RVAdapterAssignments(assignments));
                                             changeState(state.COURSE);
-                                            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
@@ -554,20 +598,20 @@ public class NavDrawerActivity extends AppCompatActivity
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        currentThread =id;
+                        currentThreadid = id;
+                        currentThreadpos = position;
                         try {
                             JSONArray comments = (new JSONObject(response)).getJSONArray("comments");
                             JSONArray comment_users = (new JSONObject(response)).getJSONArray("comment_users");
                             thread_views = new ArrayList<>();
-                            thread_views.add(new thread_view(threads.get(position).getUser_id(),threads.get(position).getDescription(),threads.get(position).getCreatedAt(),threads.get(position).getTitle()));
+                            thread_views.add(new thread_view(threads.get(position).getUser_id(), threads.get(position).getDescription(), threads.get(position).getCreatedAt(), threads.get(position).getTitle()));
                             for (int i = 0; i < comment_users.length(); i++)
-                                thread_views.add(new thread_view(comment_users.getJSONObject(i).getInt("id"),comments.getJSONObject(i).getString("description"),Timestamp.valueOf(comments.getJSONObject(i).getString("created_at")),comment_users.getJSONObject(i).getString("first_name")+" " +comment_users.getJSONObject(i).getString("last_name")));
+                                thread_views.add(new thread_view(comment_users.getJSONObject(i).getInt("id"), comments.getJSONObject(i).getString("description"), Timestamp.valueOf(comments.getJSONObject(i).getString("created_at")), comment_users.getJSONObject(i).getString("first_name") + " " + comment_users.getJSONObject(i).getString("last_name")));
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        if(thread_views!=null){
-                            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_send_white_36dp));
+                        if (thread_views != null) {
                             initializeAdapter(new RVAdapterThreadShow(thread_views));
                             changeState(state.COMMENTS);
                         }
@@ -575,8 +619,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(mContext,"thread load error",Toast.LENGTH_LONG).show();
-                Log.e("threadloaderror","threadloaderror");
+                Log.e("threadloaderror",error.getLocalizedMessage());
             }
         });
         // Add the request to the RequestQueue.
@@ -593,8 +636,8 @@ public class NavDrawerActivity extends AppCompatActivity
     {
         super.onResume();
         threads = new ArrayList<>();
-        thread_views = new ArrayList<>();
         getThreads(code, 0);
+        if(getState()!=state.THREADS) changeState(state.THREADS);
     }
 
     @Override
@@ -605,7 +648,6 @@ public class NavDrawerActivity extends AppCompatActivity
         }
         else if(getState()!=state.THREADS)
         {
-            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
             changeState(state.THREADS);
             initializeAdapter(new RVAdapterThreads(threads));
         }
