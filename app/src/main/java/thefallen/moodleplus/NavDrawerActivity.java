@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -78,9 +79,10 @@ public class NavDrawerActivity extends AppCompatActivity
     String course;
     String[] code;
     int[] order = new int[]{-1,-1,1};
+    AppBarLayout mToolbarContainer;
     public enum state
     {
-        THREADS,NOTIFICATIONS,COURSE,GRADES,COMMENTS;
+        THREADS,NOTIFICATIONS,COURSE,GRADES,COMMENTS
     }
 
     @Override
@@ -90,6 +92,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mToolbarContainer = ((AppBarLayout) findViewById(R.id.toolbarContainer));
 
         mContext = this;
         sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE);
@@ -122,7 +125,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 new RecyclerItemClickListener(mContext, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        if(State==state.THREADS){
+                        if(getState()==state.THREADS){
                             Log.e("thread","yup");
                             int thread_id = threads.get(position).getThread_id();
                             getThreadView(thread_id,position);
@@ -158,7 +161,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                         notifications.add(new notification(notifications_json_array.getJSONObject(i)));
                                     }
                                     initializeAdapter(new RVAdapterNoti(notifications));
-                                    State = state.NOTIFICATIONS;
+                                    changeState(state.NOTIFICATIONS);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -190,7 +193,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                         gradesList.add(new grade(grades_json_array.getJSONObject(i),courses_json_array.getJSONObject(i)));
                                     }
                                     initializeAdapter(new RVAdapterGradesAll(toArrayList(gradesList)));
-                                    State = state.NOTIFICATIONS;
+                                    changeState(state.NOTIFICATIONS);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -239,12 +242,12 @@ public class NavDrawerActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (State == state.COMMENTS) {
+                if (getState() == state.COMMENTS) {
                     EditText edit = (EditText) findViewById(R.id.comment);
                     Log.e("nyest", edit.getText().toString() + currentThread + "");
                     PostComment(currentThread + "", edit.getText().toString());
                 }
-                if (State == state.COURSE) {
+                if (getState() == state.COURSE) {
                     StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.courseGrade(course),
                             new Response.Listener<String>() {
                                 @Override
@@ -256,7 +259,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                             grades.add(new grade(grades_json_array.getJSONObject(i)));
                                         }
                                         initializeAdapter(new RVAdapterGrades(grades));
-                                        State = state.GRADES;
+                                        changeState(state.GRADES);
 
                                     } catch (JSONException e) {
                                         e.printStackTrace();
@@ -270,16 +273,39 @@ public class NavDrawerActivity extends AppCompatActivity
                     });
                     // Add the request to the RequestQueue.
                     queue.add(stringRequest);
-                } else if ((State == state.THREADS) && code != null) {
+                } else if ((getState () == state.THREADS) && code != null) {
                     Intent intent = new Intent(mContext, postThread.class);
                     intent.putExtra("courses", code);
                     startActivity(intent);
                 }
             }
         });
-
+        rv.addOnScrollListener(new HidingScrollListener(getStatusBarHeight()+DisplayHelper.getHeight(mContext)) {
+            @Override
+            public void onMoved(int distance) {
+                mToolbarContainer.setTranslationY(-distance);
+            }
+        });
     }
 
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
+    state getState()
+    {
+        return State;
+    }
+
+    void changeState(state STATE) {
+        if(STATE == state.COMMENTS) findViewById(R.id.comment).setVisibility(View.VISIBLE);
+        else findViewById(R.id.comment).setVisibility(View.GONE);
+        State = STATE;
+    }
     void errorSnack(int strID,boolean retry, final String thread_id, final String description)
     {
         Snackbar snackbar = Snackbar.make(fab, strID, Snackbar.LENGTH_SHORT);
@@ -465,7 +491,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                             }
                                             Collections.sort(assignments);
                                             initializeAdapter(new RVAdapterAssignments(assignments));
-                                            State = state.COURSE;
+                                            changeState(state.COURSE);
                                             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -543,7 +569,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         if(thread_views!=null){
                             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_send_white_36dp));
                             initializeAdapter(new RVAdapterThreadShow(thread_views));
-                            State=state.COMMENTS;
+                            changeState(state.COMMENTS);
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -577,10 +603,10 @@ public class NavDrawerActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
-        else if(State!=state.THREADS)
+        else if(getState()!=state.THREADS)
         {
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
-            State=state.THREADS;
+            changeState(state.THREADS);
             initializeAdapter(new RVAdapterThreads(threads));
         }
         else {
@@ -591,12 +617,12 @@ public class NavDrawerActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        if(State == state.THREADS) getMenuInflater().inflate(R.menu.nav_drawer, menu);
+        if(getState()== state.THREADS) getMenuInflater().inflate(R.menu.nav_drawer, menu);
         return true;
     }
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        return State == state.THREADS &&  super.onPrepareOptionsMenu(menu);
+        return getState() == state.THREADS &&  super.onPrepareOptionsMenu(menu);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
