@@ -1,12 +1,14 @@
 package thefallen.moodleplus;
 
+import java.sql.Timestamp;
+
 public class thread_view {
     int user_id;
     String comment;
-    String createdAt;
+    Timestamp createdAt;
     String user_name;
 
-    public thread_view(int user_id, String comment, String createdAt, String user_name)
+    public thread_view(int user_id, String comment, Timestamp createdAt, String user_name)
     {
             this.user_id = user_id;
             this.comment= comment;
@@ -18,7 +20,7 @@ public class thread_view {
         return user_id;
     }
     public String getCreatedAt() {
-        return createdAt;
+        return TimeHelper.timeFromNow(createdAt,1);
     }
 
     public String getComment() {

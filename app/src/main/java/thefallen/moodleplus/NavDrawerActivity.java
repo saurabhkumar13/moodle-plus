@@ -45,6 +45,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -240,8 +241,8 @@ public class NavDrawerActivity extends AppCompatActivity
             public void onClick(View v) {
                 if (State == state.COMMENTS) {
                     EditText edit = (EditText) findViewById(R.id.comment);
-                    Log.e("nyest",edit.getText().toString()+ currentThread +"");
-                    PostComment(currentThread + "",edit.getText().toString());
+                    Log.e("nyest", edit.getText().toString() + currentThread + "");
+                    PostComment(currentThread + "", edit.getText().toString());
                 }
                 if (State == state.COURSE) {
                     StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.courseGrade(course),
@@ -281,7 +282,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
     void errorSnack(int strID,boolean retry, final String thread_id, final String description)
     {
-        Snackbar snackbar = Snackbar.make(fab,strID,Snackbar.LENGTH_SHORT);
+        Snackbar snackbar = Snackbar.make(fab, strID, Snackbar.LENGTH_SHORT);
         if(retry) snackbar.setAction("RETRY", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -505,7 +506,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         }
                         if(in<code.length-1) getThreads(code, in + 1);
                         else    {
-                            Collections.sort(threads,new updatedAtComp(-1));
+                            Collections.sort(threads, new updatedAtComp(-1));
                             initializeAdapter(new RVAdapterThreads(threads));
                         }
 
@@ -531,32 +532,10 @@ public class NavDrawerActivity extends AppCompatActivity
                         try {
                             JSONArray comments = (new JSONObject(response)).getJSONArray("comments");
                             JSONArray comment_users = (new JSONObject(response)).getJSONArray("comment_users");
-                            JSONArray times = (new JSONObject(response)).getJSONArray("times_readable");
-
-                            int[] user_id = new int[comment_users.length()];
-                            String[] user_name = new String[comment_users.length()];
-                            String[] comment = new String[comments.length()];
-                            String[] createdAt = new String[comments.length()];
-
-                            for (int i = 0; i < comment_users.length(); i++){
-                                user_id[i] = comment_users.getJSONObject(i).getInt("id");
-                                user_name[i] = comment_users.getJSONObject(i).getString("first_name")+" " +comment_users.getJSONObject(i).getString("last_name");
-                            }
-
-                            thread_views.clear();
-                            thread head = threads.get(position);
-                            thread_views.add(new thread_view(-head.getUser_id(),head.getDescription(),head.getTime(),head.getTitle()));
-                            for (int i = 0; i<comments.length();i++){
-                                comment[i] = comments.getJSONObject(i).getString("description");
-                                createdAt[i] = times.getString(i).replace(".","");
-                                int userIdinComment = comments.getJSONObject(i).getInt("user_id");
-                                for(int j=0;j<comment_users.length();j++){
-                                    if(userIdinComment==user_id[j]){
-                                        thread_views.add(new thread_view(userIdinComment, comment[i], createdAt[i], user_name[j]));
-                                        break;
-                                    }
-                                }
-                            }
+                            thread_views = new ArrayList<>();
+                            thread_views.add(new thread_view(threads.get(position).getUser_id(),threads.get(position).getDescription(),threads.get(position).getCreatedAt(),threads.get(position).getTitle()));
+                            for (int i = 0; i < comment_users.length(); i++)
+                                thread_views.add(new thread_view(comment_users.getJSONObject(i).getInt("id"),comments.getJSONObject(i).getString("description"),Timestamp.valueOf(comments.getJSONObject(i).getString("created_at")),comment_users.getJSONObject(i).getString("first_name")+" " +comment_users.getJSONObject(i).getString("last_name")));
 
                         } catch (JSONException e) {
                             e.printStackTrace();
