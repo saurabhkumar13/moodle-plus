@@ -58,10 +58,10 @@ public class RVAdapterAssignments extends RecyclerView.Adapter<RVAdapterAssignme
 
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
-        elementHolder.time.setText(DisplayHelper.timeFromNow(elements.get(i).deadline,-1));
+        elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i).deadline,-1));
         elementHolder.description.setText(elements.get(i).description);
         elementHolder.title.setText(elements.get(i).title);
-        elementHolder.createdOn.setText("Posted on "+DisplayHelper.timeToString(elements.get(i).createdAt));
+        elementHolder.createdOn.setText("Posted on "+TimeHelper.timeToString(elements.get(i).createdAt));
 //        elementHolder.identicon.show(elements.get(i).user_id);
 //        elementHolder.course.setText(elements.get(i).course_code);
         elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));

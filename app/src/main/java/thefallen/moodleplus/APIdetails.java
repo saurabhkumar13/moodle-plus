@@ -1,5 +1,10 @@
 package thefallen.moodleplus;
 
+/*
+    This class has a list of functions that return the API url that is appropriately defined by their name.
+    Purpose of this is to make our life simpler while calling APIs also make the code there more meaningful
+    plus make it super simple to make changes to the API or the host which essentially is going to happen
+ */
 public class APIdetails {
     static private String host = "http://10.0.0.3:8000";
     public static String login()

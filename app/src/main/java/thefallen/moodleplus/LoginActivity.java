@@ -124,9 +124,6 @@ public class LoginActivity extends AppCompatActivity {
     
     }
 
-    // post request to log in to the system
-    // (username:String,password:String) -> void
-    // onSuccess gets further details from the API and starts the next activity
     /*
         name : callApi
         function : calls the API for login and handles errors, if the login is successful start the NavDrawerActivity
@@ -190,6 +187,12 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    /*
+        name : getDetails
+        function : get the course list for the current user and pass it on to the next activity
+        input : url to the API for the course list for this user: String
+        output : void
+     */
 
     public void getDetails(String url)
     {
