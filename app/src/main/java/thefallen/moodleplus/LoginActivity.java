@@ -61,8 +61,13 @@ public class LoginActivity extends AppCompatActivity {
         };
         login.setOnClickListener(loginAction);
     }
-    // To Display errors
-    // (id of the error string:int,to retry or not to retry:boolean) ==> params
+
+    /*
+        name : errorSnack
+        function : Displays error message using a snackbar
+        input : error message ID : int, Action Retry condition : boolean
+        output : void
+     */
     void errorSnack(int strID,boolean retry)
     {
         Snackbar snackbar = Snackbar.make(login,strID,Snackbar.LENGTH_SHORT);
@@ -84,10 +89,26 @@ public class LoginActivity extends AppCompatActivity {
         CookieManager manager = new java.net.CookieManager();
         CookieHandler.setDefault(manager);
     }
+
+    /*
+        name : validate
+        function : checks whether the password and username fields are both non empty, true only if both are non empty
+        input : void
+        output : boolean
+     */
+
     boolean validate()
     {
         return !userID.getText().toString().equals("")&&!password.getText().toString().equals("");
     }
+
+    /*
+        name : login
+        function : calls the callApi function for login and also remembers the login credentials if the checkbox is ticked
+        input : void
+        output : void
+     */
+
     void login()
     {
         //save user details if remember me checked
@@ -106,6 +127,13 @@ public class LoginActivity extends AppCompatActivity {
     // post request to log in to the system
     // (username:String,password:String) -> void
     // onSuccess gets further details from the API and starts the next activity
+    /*
+        name : callApi
+        function : calls the API for login and handles errors, if the login is successful start the NavDrawerActivity
+        input : Username : String, Password : String
+        output : void
+     */
+
     public void callApi(final String name,final String pass)
     {
         String url = APIdetails.login();
@@ -161,6 +189,8 @@ public class LoginActivity extends AppCompatActivity {
             queue.add(stringRequest);
 
     }
+
+
     public void getDetails(String url)
     {
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
