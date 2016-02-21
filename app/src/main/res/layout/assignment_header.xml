@@ -81,7 +81,7 @@
             android:textSize="16sp"
             android:maxLines="5"
             android:text = "This is a test assignment description i just wanna test this stuff out once"
-            android:layout_below="@+id/timeLeft"
+            android:layout_below="@+id/time"
             />
 
     </RelativeLayout>

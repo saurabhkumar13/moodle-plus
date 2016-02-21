@@ -81,6 +81,7 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
     }
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
+        Log.e("vali",i+"");
         if (i == 0)
         {
             elementHolder.name.setText(ah.getAssgn_title());
@@ -88,6 +89,8 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
             elementHolder.identicon.show(ah.getProf_id());
             elementHolder.description.setText(ah.getDescription());
             elementHolder.c_code.setText(ah.getCourse_code());
+
+            Log.e("timefail",TimeHelper.timeFromNow(ah.getDeadline(), -1));
         }
         else {
             elementHolder.name.setText(elements.get(i-1).getName());
