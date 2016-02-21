@@ -2,6 +2,7 @@ package thefallen.moodleplus;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,6 +31,8 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.CycleInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -140,6 +143,12 @@ public class NavDrawerActivity extends AppCompatActivity
                             Log.e("thread", "yup");
                             int thread_id = threads.get(position).getThread_id();
                             getThreadView(thread_id, position);
+                        }
+
+                        if (getState() == state.COURSE)
+                        {
+                            Log.e("course","yolo");
+
                         }
                         // TODO ADD TRANSITION CODES FOR THREADS AND ASSIGNMENTS HERE ~ SAURABH
                         // TODO USE THESE IN ASSIGNMENT ACTIVITY ~ WHENEVER YOU GUYS MAKE IT
@@ -343,6 +352,13 @@ public class NavDrawerActivity extends AppCompatActivity
                 .scaleY(0)
                 .setStartDelay(300)
                 .setInterpolator(new AnticipateInterpolator(3));
+        else if(!noFabStates(STATE))
+            fab.animate()
+                    .scaleX(1.3f)
+                    .scaleY(1.3f)
+                    .setDuration(600)
+                    .setInterpolator(new CycleInterpolator(2));
+            Log.e("nyaa","shjfgsh"+!noFabStates(STATE));
         State = STATE;
     }
 
