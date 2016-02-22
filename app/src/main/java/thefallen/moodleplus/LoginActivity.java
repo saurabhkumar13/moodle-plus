@@ -204,6 +204,7 @@ public class LoginActivity extends AppCompatActivity {
                     else {
                         intent.putExtra("json_courses", response);
                         startActivity(intent);
+                        finish();
                     }
                     }
                 }, new Response.ErrorListener() {

@@ -62,6 +62,7 @@ import java.util.Map;
 
 import thefallen.moodleplus.ThreadHelper.courseComp;
 import thefallen.moodleplus.ThreadHelper.createdAtComp;
+import thefallen.moodleplus.ThreadHelper.thread;
 import thefallen.moodleplus.ThreadHelper.updatedAtComp;
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
@@ -155,7 +156,11 @@ public class NavDrawerActivity extends AppCompatActivity
                             int assgn_id = assignments.get(position-1).getassgnId();
                             getAssgnView(assgn_id, position);
                         }
-
+                        if(getState() == state.NOTIFICATIONS)
+                        {
+                            Log.e("noti",notifications.get(position).thread_id+" "+getPosition(threads, notifications.get(position).thread_id));
+                            getThreadView(notifications.get(position).thread_id, getPosition(threads, notifications.get(position).thread_id));
+                        }
                         if (getState() == state.SUBMISSIONS) {
                             if (position > assignment_views.size() || position == 0) return;
                             Log.e("sad", position + " " + assignment_views.size() + " " + (position > assignment_views.size()));
@@ -298,6 +303,8 @@ public class NavDrawerActivity extends AppCompatActivity
                                         new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {
+                                                Intent intent = new Intent(mContext, LoginActivity.class);
+                                                startActivity(intent);
                                                 finish();
                                             }
 
@@ -377,7 +384,10 @@ public class NavDrawerActivity extends AppCompatActivity
             }
         });
     }
-
+    public int getPosition(ArrayList<thread> list,int obj){
+        for(int i=0;i<list.size();i++) if(list.get(i).getThread_id()==obj) return i;
+        return -1;
+    }
     public int getStatusBarHeight() {
         int result = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -791,14 +801,14 @@ public class NavDrawerActivity extends AppCompatActivity
             changeState(state.COURSE);
             initializeAdapter(new RVAdapterAssignments(assignments,currCourse));
         }
-        else if(getState()!=state.THREADS) {
-            changeState(state.THREADS);
-            initializeAdapter(new RVAdapterThreads(threads));
-        }
         else if(getState()==state.GRADES)
         {
             changeState(state.COURSE);
             initializeAdapter(new RVAdapterAssignments(assignments, currCourse));
+        }
+        else if(getState()!=state.THREADS) {
+            changeState(state.THREADS);
+            initializeAdapter(new RVAdapterThreads(threads));
         }
         else {
             super.onBackPressed();
