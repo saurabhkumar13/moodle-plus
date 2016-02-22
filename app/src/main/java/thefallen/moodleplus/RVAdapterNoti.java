@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import thefallen.moodleplus.identicons.SymmetricIdenticon;
+
 public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHolder> {
 
     public static class ElementHolder extends RecyclerView.ViewHolder {
@@ -20,14 +22,16 @@ public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHol
         CardView cv;
         TextView time;
         TextView description;
-//        SymmetricIdenticon identicon;
+        TextView course,title;
+        SymmetricIdenticon identicon;
         ElementHolder(View itemView) {
             super(itemView);
             cv = (CardView)itemView.findViewById(R.id.cv);
+            title = (TextView)itemView.findViewById(R.id.title);
             time = (TextView)itemView.findViewById(R.id.time);
-//            course = (TextView)itemView.findViewById(R.id.course);
+            course = (TextView)itemView.findViewById(R.id.course);
             description = (TextView)itemView.findViewById(R.id.description);
-//            identicon = (SymmetricIdenticon)itemView.findViewById(R.id.identicon);
+            identicon = (SymmetricIdenticon)itemView.findViewById(R.id.identicon);
         }
     }
 
@@ -54,12 +58,16 @@ public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHol
 
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
-        elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i).createdAt,1));
+        elementHolder.title.setText(elements.get(i).name);
+        if(TimeHelper.timeFromNow(elements.get(i).createdAt,1)==null)
+            elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i).createdAt,-1));
+        else
+            elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i).createdAt,1));
         elementHolder.description.setText(elements.get(i).description);
         if(elements.get(i).not_seen)
-            elementHolder.cv.setCardBackgroundColor(Color.parseColor("#f03498"));
-//        elementHolder.identicon.show(elements.get(i).user_id);
-//        elementHolder.course.setText(elements.get(i).course_code);
+            elementHolder.cv.setCardBackgroundColor(Color.parseColor("@color/colorPrimary"));
+        elementHolder.identicon.show(elements.get(i).user_id);
+        elementHolder.course.setText(elements.get(i).course_code);
         elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
         elementHolder.cv.animate()
                 .setStartDelay(i * 200)
