@@ -21,6 +21,7 @@
     <com.github.florent37.materialtextfield.MaterialTextField
         android:layout_width="300dp"
         android:layout_height="wrap_content"
+        app:mtf_openKeyboardOnFocus="true"
         app:mtf_image="@drawable/ic_account_circle_blue_grey_500_36dp"
         >
 
@@ -36,6 +37,7 @@
     <com.github.florent37.materialtextfield.MaterialTextField
         android:layout_width="300dp"
         android:layout_height="wrap_content"
+        app:mtf_openKeyboardOnFocus="true"
         app:mtf_image="@drawable/ic_vpn_key_blue_grey_500_36dp"
         >
 
@@ -53,8 +55,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Remember me"
-        android:buttonTint="#dddddd"
-        android:textColor="#dddddd"
+        android:buttonTint="#ffffff"
+        android:textColor="#ffffff"
         android:id="@+id/save_details"
         android:layout_margin="30dp"
         android:layout_gravity="right"/>
@@ -64,7 +66,7 @@
         android:layout_margin="16dp"
         android:layout_gravity="right"
         android:background="#2f000000"
-        android:textColor="#dddddd"
+        android:textColor="#efefef"
         android:text="login"
         android:id="@+id/login"/>
 </LinearLayout>
