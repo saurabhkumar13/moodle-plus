@@ -288,10 +288,6 @@ public class NavDrawerActivity extends AppCompatActivity
         navigationView.getMenu().add(1, 1, 1, "Logout").setIcon(R.drawable.ic_exit_to_app_blue_grey_500_24dp).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                alertDialogBuilder.setTitle("Log out?")
-                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
                                 SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
                                 sharedPreferencesEditor.putString("userID", "");
                                 sharedPreferencesEditor.putString("password", "");
@@ -302,6 +298,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                             public void onResponse(String response) {
                                                 Intent intent = new Intent(mContext, LoginActivity.class);
                                                 startActivity(intent);
+                                                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                                                 finish();
                                             }
 
@@ -313,11 +310,6 @@ public class NavDrawerActivity extends AppCompatActivity
                                 });
                                 // Add the request to the RequestQueue.
                                 queue.add(stringRequest);
-                            }
-                        })
-                        .setCancelable(true)
-                        .setNegativeButton("NO", null)
-                        .show();
                 return false;
             }
         });

@@ -204,7 +204,7 @@ public class LoginActivity extends AppCompatActivity {
                     else {
                         intent.putExtra("json_courses", response);
                         startActivity(intent);
-                        overridePendingTransition(R.layout.slide_in_right,R.layout.slide_out_left);
+                        overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
                     }
                     }
                 }, new Response.ErrorListener() {
