@@ -151,7 +151,8 @@ public class NavDrawerActivity extends AppCompatActivity
                         }
 
                         if (getState() == state.COURSE) {
-                            int assgn_id = assignments.get(position).getassgnId();
+                            if(position==0) return;
+                            int assgn_id = assignments.get(position-1).getassgnId();
                             getAssgnView(assgn_id, position);
                         }
 
