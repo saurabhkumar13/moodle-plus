@@ -2,9 +2,9 @@ package thefallen.moodleplus;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.TimeInterpolator;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -14,10 +14,10 @@ import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SubMenu;
 import android.view.View;
@@ -32,14 +32,12 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
-import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.CycleInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NoConnectionError;
@@ -64,7 +62,6 @@ import java.util.Map;
 
 import thefallen.moodleplus.ThreadHelper.courseComp;
 import thefallen.moodleplus.ThreadHelper.createdAtComp;
-import thefallen.moodleplus.ThreadHelper.thread;
 import thefallen.moodleplus.ThreadHelper.updatedAtComp;
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
@@ -87,7 +84,6 @@ public class NavDrawerActivity extends AppCompatActivity
     RecyclerView rv;
     SharedPreferences sharedPreferences;
     NavigationView navigationView;
-    ImageView logout;
     SubMenu topChannelMenu;
     state State=state.THREADS;
     FloatingActionButton fab;
@@ -96,6 +92,7 @@ public class NavDrawerActivity extends AppCompatActivity
     EditText comment;
     public static boolean adapterInit = false;
     int[] order = new int[]{-1,-1,1};
+    AlertDialog.Builder alertDialogBuilder;
     AppBarLayout mToolbarContainer;
     public enum state
     {
@@ -116,6 +113,7 @@ public class NavDrawerActivity extends AppCompatActivity
         queue = Volley.newRequestQueue(this);
 
         comment = (EditText)findViewById(R.id.comment);
+        alertDialogBuilder = new AlertDialog.Builder(mContext,R.style.AppthemeDialog);
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
@@ -145,24 +143,22 @@ public class NavDrawerActivity extends AppCompatActivity
                 new RecyclerItemClickListener(mContext, new RecyclerItemClickListener.OnItemClickListener() {
 
                     @Override
-                    public void onItemClick(View view, final int position,boolean left) {
+                    public void onItemClick(View view, final int position, boolean left) {
                         if (getState() == state.THREADS) {
                             int thread_id = threads.get(position).getThread_id();
                             getThreadView(thread_id, position);
                         }
 
-                        if (getState() == state.COURSE)
-                        {
+                        if (getState() == state.COURSE) {
                             int assgn_id = assignments.get(position).getassgnId();
-                            getAssgnView(assgn_id,position);
+                            getAssgnView(assgn_id, position);
                         }
 
-                        if(getState() == state.SUBMISSIONS) {
-                            if(position==0) return;
+                        if (getState() == state.SUBMISSIONS) {
+                            if (position == 0) return;
                             RVAdapterAssgnShow.ElementHolder eh = (RVAdapterAssgnShow.ElementHolder) rv.findViewHolderForAdapterPosition(position);
-                            String submission_link = assignment_views.get(position - 1).getLink();
-                            if(left)
-                            {
+                            final String submission_link = assignment_views.get(position - 1).getLink();
+                            if (left) {
                                 DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
                                 DownloadManager.Request request = new DownloadManager.Request(
                                         Uri.parse(APIdetails.subDLlink(submission_link)));
@@ -176,19 +172,21 @@ public class NavDrawerActivity extends AppCompatActivity
                                         .setInterpolator(new CycleInterpolator(1))
                                         .setDuration(200)
                                         .start();
-                            }
-                            else
-                            {
-                                StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.subDelete(submission_link),
-                                        new Response.Listener<String>() {
+                            } else {
+                                alertDialogBuilder.setTitle("Delete Submission?")
+                                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
                                             @Override
-                                            public void onResponse(String response) {
-                                                assignment_views.remove(position-1);
-                                                initializeAdapter(new RVAdapterAssgnShow(ah,assignment_views));
-                                            }
-                                        }, new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError volleyError) {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.subDelete(submission_link),
+                                                        new Response.Listener<String>() {
+                                                            @Override
+                                                            public void onResponse(String response) {
+                                                                assignment_views.remove(position - 1);
+                                                                initializeAdapter(new RVAdapterAssgnShow(ah, assignment_views));
+                                                            }
+                                                        }, new Response.ErrorListener() {
+                                                    @Override
+                                                    public void onErrorResponse(VolleyError volleyError) {
 //                                        if(volleyError instanceof NoConnectionError) {
 //                                            errorSnack(R.string.no_internet,true);
 //                                        } else if (volleyError instanceof TimeoutError) {
@@ -196,16 +194,17 @@ public class NavDrawerActivity extends AppCompatActivity
 //                                        } else if (volleyError instanceof ServerError) {
 //                                            errorSnack(R.string.internal_server,true);
 //                                        }
-                                    }
-                                });
-                                // Add the request to the RequestQueue.
-                                queue.add(stringRequest);
-                                eh.delete.animate()
-                                        .scaleX(1.1f)
-                                        .scaleY(1.1f)
-                                        .setInterpolator(new CycleInterpolator(1))
-                                        .setDuration(200)
-                                        .start();
+                                                    }
+                                                });
+                                                // Add the request to the RequestQueue.
+                                                queue.add(stringRequest);
+                                            }
+                                        })
+                                        .setCancelable(true)
+                                        .setNegativeButton("NO", null)
+                                        .show();
+
+
                             }
                         }
                     }
@@ -214,7 +213,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 )
         );
 
-        topChannelMenu.add("Notifications").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        navigationView.getMenu().add(1, 1, 1, "Notifications").setIcon(R.drawable.ic_notifications_active_blue_grey_500_24dp).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.notifications(),
@@ -245,7 +244,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 return false;
             }
         });
-        topChannelMenu.add("Grades").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        navigationView.getMenu().add(1, 1, 1, "Grades").setIcon(R.drawable.ic_school_blue_grey_500_24dp).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.grades(),
@@ -277,32 +276,38 @@ public class NavDrawerActivity extends AppCompatActivity
                 return false;
             }
         });
-        topChannelMenu.add("");
-
-        logout.setOnClickListener(new View.OnClickListener() {
+        navigationView.getMenu().add(1, 1, 1, "Logout").setIcon(R.drawable.ic_exit_to_app_blue_grey_500_24dp).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
-            public void onClick(View v) {
-                {
-                    SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
-                    sharedPreferencesEditor.putString("userID", "");
-                    sharedPreferencesEditor.putString("password", "");
-                    sharedPreferencesEditor.apply();
-                    StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.logout(),
-                            new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    finish();
-                                }
+            public boolean onMenuItemClick(MenuItem item) {
+                alertDialogBuilder.setTitle("Log out?")
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+                                sharedPreferencesEditor.putString("userID", "");
+                                sharedPreferencesEditor.putString("password", "");
+                                sharedPreferencesEditor.apply();
+                                StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.logout(),
+                                        new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                                finish();
+                                            }
 
-                            }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            finish();
-                        }
-                    });
-                    // Add the request to the RequestQueue.
-                    queue.add(stringRequest);
-                }
+                                        }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        finish();
+                                    }
+                                });
+                                // Add the request to the RequestQueue.
+                                queue.add(stringRequest);
+                            }
+                        })
+                        .setCancelable(true)
+                        .setNegativeButton("NO", null)
+                        .show();
+                return false;
             }
         });
 
@@ -596,16 +601,8 @@ public class NavDrawerActivity extends AppCompatActivity
     {
         Menu m = navigationView.getMenu();
         topChannelMenu = m.addSubMenu("Courses");
-        MenuItem mi = m.getItem(m.size()-1);
-        mi.setTitle(mi.getTitle());
-        logout = new ImageView(mContext);
-        FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, DisplayHelper.dpToPx(54,mContext));
-        flp.gravity= Gravity.BOTTOM;
-        logout.setBackgroundResource(R.drawable.rectangle);
-        logout.setLayoutParams(flp);
-        logout.setScaleType(ImageView.ScaleType.CENTER);
-        logout.setImageDrawable(getResources().getDrawable(R.drawable.ic_power_settings_new_white_18dp));
-        navigationView.addView(logout);
+//        MenuItem mi = m.getItem(m.size()-1);
+//        mi.setTitle(mi.getTitle());
 
         final JSONObject courses;
         try {
@@ -614,7 +611,7 @@ public class NavDrawerActivity extends AppCompatActivity
             code = new String[coursesList.length()];
             for(int i=0;i<coursesList.length();i++) {
                 code[i] = coursesList.getJSONObject(i).getString("code");
-                topChannelMenu.add(0,i,0,coursesList.getJSONObject(i).getString("code").toUpperCase() + ": " + coursesList.getJSONObject(i).getString("name")).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                topChannelMenu.add(0,i,1,coursesList.getJSONObject(i).getString("code").toUpperCase() + ": " + coursesList.getJSONObject(i).getString("name")).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         course=code[item.getItemId()];
@@ -713,7 +710,6 @@ public class NavDrawerActivity extends AppCompatActivity
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("threadloaderror",error.getLocalizedMessage());
             }
         });
         // Add the request to the RequestQueue.
@@ -749,7 +745,6 @@ public class NavDrawerActivity extends AppCompatActivity
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("Assignmentloaderror",error.getLocalizedMessage());
             }
         });
         // Add the request to the RequestQueue.
