@@ -409,14 +409,26 @@ public class NavDrawerActivity extends AppCompatActivity
             comment.animate()
                     .translationXBy(-DisplayHelper.getWidth(mContext))
                     .setDuration(300)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                        }
+                    })
                     .setInterpolator(new AccelerateDecelerateInterpolator());
         }
         else if(STATE != state.COMMENTS ) {
             comment.animate()
                     .translationXBy(DisplayHelper.getWidth(mContext))
                     .setDuration(300)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            comment.setVisibility(View.GONE);
+                        }
+                    })
                     .setInterpolator(new AccelerateDecelerateInterpolator());
-            comment.setVisibility(View.GONE);
         }
         if(STATE == state.COURSE)
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
