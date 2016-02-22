@@ -76,6 +76,7 @@ public class NavDrawerActivity extends AppCompatActivity
     int currentThreadpos;
     int currentAssgnId;
     int currentAssgnpos;
+    course currCourse;
     assignment_header ah;
     ArrayList<notification> notifications;
     ArrayList<assignmentListItem> assignments;
@@ -155,7 +156,8 @@ public class NavDrawerActivity extends AppCompatActivity
                         }
 
                         if (getState() == state.SUBMISSIONS) {
-                            if (position == 0) return;
+                            if (position > assignment_views.size()||position==0) return;
+                            Log.e("sad",position+" "+assignment_views.size()+" "+(position > assignment_views.size()));
                             RVAdapterAssgnShow.ElementHolder eh = (RVAdapterAssgnShow.ElementHolder) rv.findViewHolderForAdapterPosition(position);
                             final String submission_link = assignment_views.get(position - 1).getLink();
                             if (left) {
@@ -181,7 +183,12 @@ public class NavDrawerActivity extends AppCompatActivity
                                                         new Response.Listener<String>() {
                                                             @Override
                                                             public void onResponse(String response) {
-                                                                assignment_views.remove(position - 1);
+                                                                try{
+                                                                    assignment_views.remove(position - 1);
+                                                                }
+                                                                catch (IndexOutOfBoundsException e){
+                                                                    Log.e("index",e.getLocalizedMessage());
+                                                                }
                                                                 initializeAdapter(new RVAdapterAssgnShow(ah, assignment_views));
                                                             }
                                                         }, new Response.ErrorListener() {
@@ -530,6 +537,7 @@ public class NavDrawerActivity extends AppCompatActivity
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String s) {
+                                    getAssgnView(currentAssgnId,currentAssgnpos);
                                 }
                             },
                             new Response.ErrorListener() {
@@ -626,7 +634,8 @@ public class NavDrawerActivity extends AppCompatActivity
                                                 assignments.add(new assignmentListItem(assignments_json_array.getJSONObject(i)));
                                             }
                                             Collections.sort(assignments);
-                                            initializeAdapter(new RVAdapterAssignments(assignments));
+                                            currCourse = new course(new JSONObject(response));
+                                            initializeAdapter(new RVAdapterAssignments(assignments,currCourse));
                                             changeState(state.COURSE);
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -764,7 +773,6 @@ public class NavDrawerActivity extends AppCompatActivity
         super.onResume();
         if(getState()==state.SUBMISSIONS)
         {
-            getAssgnView(currentAssgnId,currentAssgnpos);
             return;
         }
         threads = new ArrayList<>();
@@ -781,7 +789,7 @@ public class NavDrawerActivity extends AppCompatActivity
         else if(getState()==state.SUBMISSIONS)
         {
             changeState(state.COURSE);
-            initializeAdapter(new RVAdapterAssignments(assignments));
+            initializeAdapter(new RVAdapterAssignments(assignments,currCourse));
         }
         else if(getState()!=state.THREADS)
         {

@@ -96,7 +96,7 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
                 dstr = "Assignment deadline was " + TimeHelper.timeToString(ah.getDeadline());
             }
             else {
-                if(((-System.currentTimeMillis() + ah.deadline.getTime()) / 1000*60*60*24)>7)
+                if(((-System.currentTimeMillis() + ah.deadline.getTime()) / (1000*60*60*24))>7)
                     dstr = "Assignment deadline is on "+TimeHelper.timeToString(ah.deadline);
                 else{
                 dstr = TimeHelper.timeFromNow(ah.getDeadline(), -1) + " left ";
