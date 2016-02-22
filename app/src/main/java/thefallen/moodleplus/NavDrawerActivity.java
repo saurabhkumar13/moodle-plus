@@ -94,6 +94,7 @@ public class NavDrawerActivity extends AppCompatActivity
     String course;
     String[] code;
     EditText comment;
+    public static boolean adapterInit = false;
     int[] order = new int[]{-1,-1,1};
     AppBarLayout mToolbarContainer;
     public enum state
@@ -144,7 +145,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 new RecyclerItemClickListener(mContext, new RecyclerItemClickListener.OnItemClickListener() {
 
                     @Override
-                    public void onItemClick(View view, int position,boolean left) {
+                    public void onItemClick(View view, final int position,boolean left) {
                         if (getState() == state.THREADS) {
                             int thread_id = threads.get(position).getThread_id();
                             getThreadView(thread_id, position);
@@ -182,6 +183,8 @@ public class NavDrawerActivity extends AppCompatActivity
                                         new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {
+                                                assignment_views.remove(position-1);
+                                                initializeAdapter(new RVAdapterAssgnShow(ah,assignment_views));
                                             }
                                         }, new Response.ErrorListener() {
                                     @Override
@@ -342,6 +345,11 @@ public class NavDrawerActivity extends AppCompatActivity
                 }
                 else if(getState() == state.SUBMISSIONS)
                 {
+                    if(TimeHelper.timeFromNow(assignments.get(currentAssgnpos).deadline,-1).equals(""))
+                    {
+                        Snackbar.make(fab,"DEADLINE PASSED",Snackbar.LENGTH_SHORT).show();
+                        return;
+                    }
                     Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                     intent.setType("file/*");
                     startActivityForResult(intent,PICKFILE_RESULT_CODE);
@@ -351,7 +359,9 @@ public class NavDrawerActivity extends AppCompatActivity
         rv.addOnScrollListener(new HidingScrollListener(getStatusBarHeight() + DisplayHelper.getToolbarHeight(mContext)) {
             @Override
             public void onMoved(int distance) {
-                mToolbarContainer.setTranslationY(-distance);
+
+                if (!adapterInit) mToolbarContainer.setTranslationY(-distance);
+                else mToolbarContainer.setTranslationY(0);
             }
         });
     }
@@ -370,7 +380,7 @@ public class NavDrawerActivity extends AppCompatActivity
     }
 
     void changeState(state STATE) {
-        if(STATE == state.COMMENTS) {
+        if(STATE == state.COMMENTS && State !=state.COMMENTS) {
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_send_white_36dp));
             comment.setVisibility(View.VISIBLE);
             comment.setX(DisplayHelper.dpToPx(20,mContext)+DisplayHelper.getWidth(mContext));
@@ -379,12 +389,12 @@ public class NavDrawerActivity extends AppCompatActivity
                     .setDuration(300)
                     .setInterpolator(new AccelerateDecelerateInterpolator());
         }
-        else {
+        else if(STATE != state.COMMENTS ) {
             comment.animate()
                     .translationXBy(DisplayHelper.getWidth(mContext))
                     .setDuration(300)
                     .setInterpolator(new AccelerateDecelerateInterpolator());
-//            comment.setVisibility(View.GONE);ga
+            comment.setVisibility(View.GONE);
         }
         if(STATE == state.COURSE)
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
@@ -397,20 +407,39 @@ public class NavDrawerActivity extends AppCompatActivity
                 .scaleX(1)
                 .scaleY(1)
                 .setStartDelay(300)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationCancel(animation);
+                        }
+                    })
                 .setInterpolator(new OvershootInterpolator(3));
-        else if(!noFabStates(State)&&noFabStates(STATE))
+        else if(!noFabStates(State)&&noFabStates(STATE)&&STATE!=State)
             fab.animate()
                 .scaleX(0)
                 .scaleY(0)
                 .setStartDelay(300)
+                .setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationCancel(animation);
+            }
+        })
                 .setInterpolator(new AnticipateInterpolator(3));
         else if(!noFabStates(STATE))
             fab.animate()
                     .scaleX(1.3f)
                     .scaleY(1.3f)
                     .setDuration(600)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationCancel(animation);
+                            fab.setScaleX(1.0f);
+                            fab.setScaleY(1.0f);
+                        }
+                    })
                     .setInterpolator(new CycleInterpolator(2));
-            Log.e("nyaa","shjfgsh"+!noFabStates(STATE));
         State = STATE;
     }
 
@@ -436,12 +465,11 @@ public class NavDrawerActivity extends AppCompatActivity
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.e("commentresponse", response);
                         try {
                             if((new JSONObject(response)).getBoolean("success"))
                             {
                                 comment.setText("");
-                                getThreadView(currentThreadid,currentThreadpos);
+                                getThreadView(currentThreadid, currentThreadpos);
                             }
                             else errorSnack(R.string.error,false,thread_id,description);
                         } catch (JSONException e) {
@@ -493,17 +521,15 @@ public class NavDrawerActivity extends AppCompatActivity
                 if(resultCode==RESULT_OK){
                     String file = data.getData().getPath(),file2 = getRealPathFromUri(mContext,data.getData());
                     if(!file2.equals("")) file = file2;
-                    MultipartRequest multipartRequest = new MultipartRequest(APIdetails.assignmentSubmission(1), file, "azazel",
+                    MultipartRequest multipartRequest = new MultipartRequest(APIdetails.assignmentSubmission(currentAssgnId), file, "enter file name here",
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String s) {
-                                    Log.e("file","success");
                                 }
                             },
                             new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError volleyError) {
-                                    Log.e("file",volleyError.getLocalizedMessage());
                                 }
                             }
                     );
@@ -734,12 +760,18 @@ public class NavDrawerActivity extends AppCompatActivity
     // Initialize cards to display
     private void initializeAdapter(RecyclerView.Adapter adapter){
         invalidateOptionsMenu();
+        adapterInit = true;
         rv.setAdapter(adapter);
     }
     @Override
     public void onResume()
     {
         super.onResume();
+        if(getState()==state.SUBMISSIONS)
+        {
+            getAssgnView(currentAssgnId,currentAssgnpos);
+            return;
+        }
         threads = new ArrayList<>();
         getThreads(code, 0);
         if(getState()!=state.THREADS) changeState(state.THREADS);
@@ -750,6 +782,11 @@ public class NavDrawerActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        }
+        else if(getState()==state.SUBMISSIONS)
+        {
+            changeState(state.COURSE);
+            initializeAdapter(new RVAdapterAssignments(assignments));
         }
         else if(getState()!=state.THREADS)
         {

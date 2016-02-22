@@ -67,7 +67,7 @@ public class RVAdapterThreads extends RecyclerView.Adapter<RVAdapterThreads.Elem
         elementHolder.course.setText(elements.get(i).getCourse());
         elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
         elementHolder.cv.animate()
-                .setStartDelay(i * 200)
+                .setStartDelay(i * 100)
                 .translationXBy(DisplayHelper.getWidth(context))
                 .setInterpolator(new OvershootInterpolator())
                 .setDuration(600)

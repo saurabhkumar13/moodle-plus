@@ -73,7 +73,6 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
     @Override
     public ElementHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v;
-        Log.e("threadHeader", i + "");
         if(i!=0)
             v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.submissions_element, viewGroup, false);
         else
@@ -89,7 +88,6 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
     }
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
-        Log.e("vali",i+"");
         if (i == 0)
         {
             String dstr;
@@ -98,10 +96,12 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
                 dstr = "Assignment deadline was " + TimeHelper.timeToString(ah.getDeadline());
             }
             else {
+                if(((-System.currentTimeMillis() + ah.deadline.getTime()) / 1000*60*60*24)>7)
+                    dstr = "Assignment deadline is on "+TimeHelper.timeToString(ah.deadline);
+                else{
+                dstr = TimeHelper.timeFromNow(ah.getDeadline(), -1) + " left ";
                 if (ah.getLatedays() != 0)
-                    dstr = TimeHelper.timeFromNow(ah.getDeadline(), 1) + " left + " + ah.getLatedays() + " day *";
-                else
-                    dstr = TimeHelper.timeFromNow(ah.getDeadline(), 1) + " left";
+                     dstr += "+ "+ah.getLatedays() + " days **";}
             }
             elementHolder.name.setText(ah.getAssgn_title());
             elementHolder.time.setText(dstr);
@@ -109,7 +109,6 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
             elementHolder.description.setText(ah.getDescription());
             elementHolder.c_code.setText(ah.getCourse_code());
 
-            Log.e("timefail",TimeHelper.timeFromNow(ah.getDeadline(), -1));
         }
         else {
             elementHolder.name.setText(elements.get(i-1).getName());

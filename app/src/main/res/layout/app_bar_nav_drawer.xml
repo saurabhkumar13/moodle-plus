@@ -21,13 +21,18 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv"
         android:paddingTop="?attr/actionBarSize"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="100dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_above="@+id/comment"
         android:clipToPadding="false"/>
 
     <EditText
@@ -36,14 +41,14 @@
         android:layout_width="match_parent"
         android:gravity="center_vertical"
         android:paddingLeft="20dp"
-        android:layout_margin="20dp"
         android:visibility="gone"
+        android:layout_margin="20dp"
         android:hint="Post Comment"
         android:textColorHint="#999999"
         android:background="@drawable/round_edittext"
         android:layout_gravity="bottom|end"
         />
-
+    </LinearLayout>
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

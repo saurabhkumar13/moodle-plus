@@ -2,6 +2,7 @@ package thefallen.moodleplus;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 public abstract class HidingScrollListener extends RecyclerView.OnScrollListener {
 
@@ -22,6 +23,9 @@ public abstract class HidingScrollListener extends RecyclerView.OnScrollListener
         if((mToolbarOffset <mToolbarHeight && dy>0) || (mToolbarOffset >0 && dy<0)) {
             mToolbarOffset += dy;
         }
+        if(NavDrawerActivity.adapterInit) mToolbarOffset=0;
+        NavDrawerActivity.adapterInit = false;
+
     }
 
     private void clipToolbarOffset() {

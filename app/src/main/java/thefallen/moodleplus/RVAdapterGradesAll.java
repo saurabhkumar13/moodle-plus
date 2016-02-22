@@ -50,7 +50,6 @@ public class RVAdapterGradesAll extends RecyclerView.Adapter<RVAdapterGradesAll.
     public int getItemViewType(int i) {
         // Just as an example, return 0 or 2 depending on position
         // Note that unlike in ListView adapters, types don't have to be contiguous
-        Log.e("rv"," mew "+getItemCount()+" "+i);
         for(int k=0;k<elements.size()&&i>=0;k++) {if(i>elements.get(k).size()) i-=elements.get(k).size()+1; else break;}
         if(i==0) return 0;
         else return 2;
@@ -65,7 +64,6 @@ public class RVAdapterGradesAll extends RecyclerView.Adapter<RVAdapterGradesAll.
         {
             v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grade_header, viewGroup, false);
         }
-        Log.e("rv",i+" ");
         ElementHolder eh = new ElementHolder(v,i);
         context = viewGroup.getContext();
         return eh;

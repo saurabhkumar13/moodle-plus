@@ -57,7 +57,6 @@ public class RVAdapterThreadShow extends RecyclerView.Adapter<RVAdapterThreadSho
     @Override
     public ElementHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v;
-        Log.e("threadHeader",i+"");
         if(i!=0)
             v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.comment_element, viewGroup, false);
         else
@@ -77,13 +76,13 @@ public class RVAdapterThreadShow extends RecyclerView.Adapter<RVAdapterThreadSho
         elementHolder.comment.setText(elements.get(i).getComment());
         elementHolder.time.setText(elements.get(i).getCreatedAt());
         elementHolder.identicon.show(elements.get(i).getUser_id());
-        elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
-        elementHolder.cv.animate()
-                .setStartDelay((i+1) * 100)
-                .translationXBy(DisplayHelper.getWidth(context))
-                .setInterpolator(new OvershootInterpolator())
-                .setDuration(600)
-                .start();
+//        elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
+//        elementHolder.cv.animate()
+//                .setStartDelay((i+1) * 100)
+//                .translationXBy(DisplayHelper.getWidth(context))
+//                .setInterpolator(new OvershootInterpolator())
+//                .setDuration(600)
+//                .start();
 
     }
     @Override

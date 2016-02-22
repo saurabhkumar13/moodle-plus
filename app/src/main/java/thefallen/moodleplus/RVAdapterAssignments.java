@@ -58,7 +58,10 @@ public class RVAdapterAssignments extends RecyclerView.Adapter<RVAdapterAssignme
 
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
-        elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i).deadline,-1));
+        String time = TimeHelper.timeFromNow(elements.get(i).deadline, -1);
+        if(!time.equals(""))
+            elementHolder.title.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_hourglass_empty_blue_grey_500_36dp,0,0,0);
+        elementHolder.time.setText(time);
         elementHolder.description.setText(elements.get(i).description);
         elementHolder.title.setText(elements.get(i).title);
         elementHolder.createdOn.setText("Posted on "+TimeHelper.timeToString(elements.get(i).createdAt));
@@ -66,7 +69,7 @@ public class RVAdapterAssignments extends RecyclerView.Adapter<RVAdapterAssignme
 //        elementHolder.course.setText(elements.get(i).course_code);
         elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
         elementHolder.cv.animate()
-                .setStartDelay(i * 200)
+                .setStartDelay(i * 100)
                 .translationXBy(DisplayHelper.getWidth(context))
                 .setInterpolator(new OvershootInterpolator())
                 .setDuration(600)
