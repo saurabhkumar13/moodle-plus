@@ -157,8 +157,8 @@ public class NavDrawerActivity extends AppCompatActivity
                         }
 
                         if (getState() == state.SUBMISSIONS) {
-                            if (position > assignment_views.size()||position==0) return;
-                            Log.e("sad",position+" "+assignment_views.size()+" "+(position > assignment_views.size()));
+                            if (position > assignment_views.size() || position == 0) return;
+                            Log.e("sad", position + " " + assignment_views.size() + " " + (position > assignment_views.size()));
                             RVAdapterAssgnShow.ElementHolder eh = (RVAdapterAssgnShow.ElementHolder) rv.findViewHolderForAdapterPosition(position);
                             final String submission_link = assignment_views.get(position - 1).getLink();
                             if (left) {
@@ -184,11 +184,10 @@ public class NavDrawerActivity extends AppCompatActivity
                                                         new Response.Listener<String>() {
                                                             @Override
                                                             public void onResponse(String response) {
-                                                                try{
+                                                                try {
                                                                     assignment_views.remove(position - 1);
-                                                                }
-                                                                catch (IndexOutOfBoundsException e){
-                                                                    Log.e("index",e.getLocalizedMessage());
+                                                                } catch (IndexOutOfBoundsException e) {
+                                                                    Log.e("index", e.getLocalizedMessage());
                                                                 }
                                                                 initializeAdapter(new RVAdapterAssgnShow(ah, assignment_views));
                                                             }
@@ -792,10 +791,14 @@ public class NavDrawerActivity extends AppCompatActivity
             changeState(state.COURSE);
             initializeAdapter(new RVAdapterAssignments(assignments,currCourse));
         }
-        else if(getState()!=state.THREADS)
-        {
+        else if(getState()!=state.THREADS) {
             changeState(state.THREADS);
             initializeAdapter(new RVAdapterThreads(threads));
+        }
+        else if(getState()==state.GRADES)
+        {
+            changeState(state.COURSE);
+            initializeAdapter(new RVAdapterAssignments(assignments, currCourse));
         }
         else {
             super.onBackPressed();
