@@ -32,7 +32,7 @@ public class TimeHelper {
         else if (min != 0)
             res = min + " mins " + secs + " secs";
         else res = secs + " secs";
-        if (order == 1) return res + " ago";
+        if (order == 1) return res;
         else return res + " left";
     }
 

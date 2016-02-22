@@ -84,8 +84,19 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
         Log.e("vali",i+"");
         if (i == 0)
         {
+            String dstr;
+            if(TimeHelper.timeFromNow(ah.getDeadline(),-1).equals(""))
+            {
+                dstr = "Assignment deadline was " + TimeHelper.timeToString(ah.getDeadline());
+            }
+            else {
+                if (ah.getLatedays() != 0)
+                    dstr = TimeHelper.timeFromNow(ah.getDeadline(), 1) + " left + " + ah.getLatedays() + " day *";
+                else
+                    dstr = TimeHelper.timeFromNow(ah.getDeadline(), 1) + " left";
+            }
             elementHolder.name.setText(ah.getAssgn_title());
-            elementHolder.time.setText(TimeHelper.timeFromNow(ah.getDeadline(), -1));
+            elementHolder.time.setText(dstr);
             elementHolder.identicon.show(ah.getProf_id());
             elementHolder.description.setText(ah.getDescription());
             elementHolder.c_code.setText(ah.getCourse_code());
