@@ -48,6 +48,7 @@
             android:id="@+id/download"
             android:padding="10dp"
             android:gravity="center"
+            android:alpha="1"
             android:layout_weight="0.5"
             />
         <TextView

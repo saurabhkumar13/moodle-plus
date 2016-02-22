@@ -158,13 +158,23 @@ public class NavDrawerActivity extends AppCompatActivity
 
                         if(getState() == state.SUBMISSIONS) {
                             if(position==0) return;
+                            RVAdapterAssgnShow.ElementHolder eh = (RVAdapterAssgnShow.ElementHolder) rv.findViewHolderForAdapterPosition(position);
                             String submission_link = assignment_views.get(position - 1).getLink();
                             if(left)
                             {
                                 DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
                                 DownloadManager.Request request = new DownloadManager.Request(
                                         Uri.parse(APIdetails.subDLlink(submission_link)));
+                                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                                request.setTitle("Moodle Plus");
+                                request.setDescription(eh.name.getText());
                                 dm.enqueue(request);
+                                eh.download.animate()
+                                        .scaleX(1.1f)
+                                        .scaleY(1.1f)
+                                        .setInterpolator(new CycleInterpolator(1))
+                                        .setDuration(200)
+                                        .start();
                             }
                             else
                             {
@@ -187,6 +197,12 @@ public class NavDrawerActivity extends AppCompatActivity
                                 });
                                 // Add the request to the RequestQueue.
                                 queue.add(stringRequest);
+                                eh.delete.animate()
+                                        .scaleX(1.1f)
+                                        .scaleY(1.1f)
+                                        .setInterpolator(new CycleInterpolator(1))
+                                        .setDuration(200)
+                                        .start();
                             }
                         }
                     }
@@ -368,14 +384,14 @@ public class NavDrawerActivity extends AppCompatActivity
                     .translationXBy(DisplayHelper.getWidth(mContext))
                     .setDuration(300)
                     .setInterpolator(new AccelerateDecelerateInterpolator());
-//            comment.setVisibility(View.GONE);
+//            comment.setVisibility(View.GONE);ga
         }
         if(STATE == state.COURSE)
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
         else if(STATE == state.THREADS)
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
         else if(STATE == state.SUBMISSIONS)
-            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_white_36dp));
+            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_white_48dp));
         if(noFabStates(State)&&!noFabStates(STATE))
             fab.animate()
                 .scaleX(1)

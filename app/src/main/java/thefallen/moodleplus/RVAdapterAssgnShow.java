@@ -27,6 +27,9 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
         TextView description;
         SymmetricIdenticon identicon;
         TextView c_code;
+        TextView download;
+        TextView delete;
+
 
         ElementHolder(View itemView,int type) {
             super(itemView);
@@ -37,6 +40,11 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
                 c_code = (TextView) itemView.findViewById(R.id.course);
                 description = (TextView) itemView.findViewById(R.id.description);
                 identicon = (SymmetricIdenticon) itemView.findViewById(R.id.identicon);
+            }
+            else
+            {
+                download = (TextView) itemView.findViewById(R.id.download);
+                delete = (TextView) itemView.findViewById(R.id.delete);
             }
         }
     }
