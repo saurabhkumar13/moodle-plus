@@ -12,7 +12,6 @@ public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListen
     private OnItemClickListener mListener;
 
     public interface OnItemClickListener {
-        public void onItemClick(View view, int position);
         public void onItemClick(View view,int position,boolean leftSide);
     }
 
@@ -37,7 +36,6 @@ public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListen
         View childView = view.findChildViewUnder(e.getX(), e.getY());
         boolean left = e.getX() < view.getWidth()/2;
         if (childView != null && mListener != null && mGestureDetector.onTouchEvent(e)) {
-            mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
             mListener.onItemClick(childView, view.getChildAdapterPosition(childView),left);
         }
         return false;

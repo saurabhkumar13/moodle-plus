@@ -6,7 +6,7 @@ package thefallen.moodleplus;
     plus make it super simple to make changes to the API or the host which essentially is going to happen
  */
 public class APIdetails {
-    static private String host = "http://10.0.0.2:8000";
+    static private String host = "http://10.0.0.16:8080";
     public static String login()
     {
         return host+"/default/login.json";
@@ -58,5 +58,14 @@ public class APIdetails {
     public static String comment()
     {
         return host+"/threads/post_comment.json";
+    }
+    public static String subDLlink(String link)
+    {
+        return host+"/courses/download/"+link;
+    }
+    public static String subDelete(String link)
+    {
+        return host+"/courses/delete/"+link;
+
     }
 }

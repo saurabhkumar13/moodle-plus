@@ -3,6 +3,7 @@ package thefallen.moodleplus;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -143,34 +144,53 @@ public class NavDrawerActivity extends AppCompatActivity
                 new RecyclerItemClickListener(mContext, new RecyclerItemClickListener.OnItemClickListener() {
 
                     @Override
-                    public void onItemClick(View view, int position,boolean left) {}
-                    @Override
-                    public void onItemClick(View view, int position) {
+                    public void onItemClick(View view, int position,boolean left) {
                         if (getState() == state.THREADS) {
-                            Log.e("thread", "yup");
                             int thread_id = threads.get(position).getThread_id();
                             getThreadView(thread_id, position);
                         }
 
                         if (getState() == state.COURSE)
                         {
-                            Log.e("course","yolo");
                             int assgn_id = assignments.get(position).getassgnId();
                             getAssgnView(assgn_id,position);
                         }
-                        // TODO ADD TRANSITION CODES FOR THREADS AND ASSIGNMENTS HERE ~ SAURABH
-                        // TODO USE THESE IN ASSIGNMENT ACTIVITY ~ WHENEVER YOU GUYS MAKE IT
-                        // TODO CODE TO PICK AND UPLOAD A FILE
-//                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//                        intent.setType("file/*");
-//                        startActivityForResult(intent,PICKFILE_RESULT_CODE);
-                        // TODO CODE TO DOWNLOAD JUST BELOW 3 LINES...
-//                        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-//                        DownloadManager.Request request = new DownloadManager.Request(
-//                                Uri.parse("http://192.168.43.254:8000/courses/download/submissions.file_.8fb9ad3499891dba.612e747874.txt"));
-//                        dm.enqueue(request);
 
+                        if(getState() == state.SUBMISSIONS) {
+                            if(position==0) return;
+                            String submission_link = assignment_views.get(position - 1).getLink();
+                            if(left)
+                            {
+                                DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                                DownloadManager.Request request = new DownloadManager.Request(
+                                        Uri.parse(APIdetails.subDLlink(submission_link)));
+                                dm.enqueue(request);
+                            }
+                            else
+                            {
+                                StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.subDelete(submission_link),
+                                        new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                            }
+                                        }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError volleyError) {
+//                                        if(volleyError instanceof NoConnectionError) {
+//                                            errorSnack(R.string.no_internet,true);
+//                                        } else if (volleyError instanceof TimeoutError) {
+//                                            errorSnack(R.string.timeout,true);
+//                                        } else if (volleyError instanceof ServerError) {
+//                                            errorSnack(R.string.internal_server,true);
+//                                        }
+                                    }
+                                });
+                                // Add the request to the RequestQueue.
+                                queue.add(stringRequest);
+                            }
+                        }
                     }
+
                 }
                 )
         );
@@ -304,6 +324,12 @@ public class NavDrawerActivity extends AppCompatActivity
                     intent.putExtra("courses", code);
                     startActivity(intent);
                 }
+                else if(getState() == state.SUBMISSIONS)
+                {
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("file/*");
+                    startActivityForResult(intent,PICKFILE_RESULT_CODE);
+                }
             }
         });
         rv.addOnScrollListener(new HidingScrollListener(getStatusBarHeight() + DisplayHelper.getToolbarHeight(mContext)) {
@@ -348,6 +374,8 @@ public class NavDrawerActivity extends AppCompatActivity
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
         else if(STATE == state.THREADS)
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
+        else if(STATE == state.SUBMISSIONS)
+            fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_white_36dp));
         if(noFabStates(State)&&!noFabStates(STATE))
             fab.animate()
                 .scaleX(1)
