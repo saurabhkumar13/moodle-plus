@@ -1,14 +1,17 @@
 package thefallen.moodleplus;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 public class grade {
-    String title,course_desc;
+    String title;
     int course_id;
     double score,outOf,weightage;
+    course courseDetails;
     public grade(JSONObject jsonObject)
     {
         try {
@@ -21,7 +24,7 @@ public class grade {
             e.printStackTrace();
         }
     }
-    public grade(JSONObject grade,JSONObject course)
+    public grade(JSONObject grade,JSONObject courseJSON)
     {
         try {
             score = grade.getDouble("score");
@@ -29,13 +32,9 @@ public class grade {
             weightage = grade.getDouble("weightage");
             course_id = grade.getInt("registered_course_id");
             title = grade.getString("name");
-            course_desc = course.getString("code").toUpperCase()+": "+course.getString("name");
+            courseDetails = new course(courseJSON,0);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-    public String toString()
-    {
-        return course_desc+" "+course_id+" "+title;
     }
 }

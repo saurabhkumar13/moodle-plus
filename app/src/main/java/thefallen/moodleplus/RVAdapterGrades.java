@@ -21,22 +21,30 @@ public class RVAdapterGrades extends RecyclerView.Adapter<RVAdapterGrades.Elemen
         TextView marks;
         TextView absMarks;
         TextView title;
-        //        SymmetricIdenticon identicon;
-        ElementHolder(View itemView) {
+        TextView time;
+        ElementHolder(View itemView,int type) {
             super(itemView);
             cv = (CardView)itemView.findViewById(R.id.cv);
             title = (TextView)itemView.findViewById(R.id.title);
-//            course = (TextView)itemView.findViewById(R.id.course);
-            marks = (TextView)itemView.findViewById(R.id.marks);
-            absMarks = (TextView)itemView.findViewById(R.id.absMarks);
-//            identicon = (SymmetricIdenticon)itemView.findViewById(R.id.identicon);
+
+            if(type!=0){
+                marks = (TextView)itemView.findViewById(R.id.marks);
+                absMarks = (TextView)itemView.findViewById(R.id.absMarks);
+            }
+            else {
+                time = (TextView)itemView.findViewById(R.id.time);
+                marks = (TextView)itemView.findViewById(R.id.createdOn);
+                absMarks = (TextView)itemView.findViewById(R.id.description);
+            }
         }
     }
 
     List<grade> elements;
+    course header;
     Context context;
-    RVAdapterGrades(List<grade> elements){
+    RVAdapterGrades(List<grade> elements,course header){
         this.elements = elements;
+        this.header = header;
     }
 
     @Override
@@ -45,34 +53,55 @@ public class RVAdapterGrades extends RecyclerView.Adapter<RVAdapterGrades.Elemen
     }
 
 
+    @Override
+    public int getItemViewType(int i) {
+        // Just as an example, return 0 or 2 depending on position
+        // Note that unlike in ListView adapters, types don't have to be contiguous
+        if(i==0) return 0;
+        else return 2;
+    }
+
+
 
     @Override
     public ElementHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grade_element, viewGroup, false);
-        ElementHolder eh = new ElementHolder(v);
+        View v;
+        if(i==0)
+            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.course_header, viewGroup, false);
+        else
+            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grade_element, viewGroup, false);
+        ElementHolder eh = new ElementHolder(v,i);
         context = viewGroup.getContext();
         return eh;
     }
 
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
-        elementHolder.title.setText(elements.get(i).title);
-        elementHolder.marks.setText(elements.get(i).score+" / "+elements.get(i).outOf);
-        elementHolder.absMarks.setText(String.format( "%.2f", elements.get(i).score*elements.get(i).weightage/elements.get(i).outOf)+" %");
+        if(i==0)
+        {
+            elementHolder.time.setText(header.getYear()+" Semester "+header.getSem());
+            elementHolder.title.setText(header.getCourseCode()+" : "+header.getName());
+            elementHolder.absMarks.setText(header.getDescription());
+            elementHolder.marks.setText("Course Structure " + header.getLtp() + " with " + header.getCredits() + " credits");
+        }
+        else {
+            elementHolder.title.setText(elements.get(i-1).title);
+            elementHolder.marks.setText(elements.get(i-1).score + " / " + elements.get(i-1).outOf);
+            elementHolder.absMarks.setText(String.format("%.2f", elements.get(i-1).score * elements.get(i-1).weightage / elements.get(i-1).outOf) + " %");
 //        elementHolder.identicon.show(elements.get(i).user_id);
 //        elementHolder.course.setText(elements.get(i).course_code);
-        elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
-        elementHolder.cv.animate()
-                .setStartDelay(i * 200)
-                .translationXBy(DisplayHelper.getWidth(context))
-                .setInterpolator(new OvershootInterpolator())
-                .setDuration(600)
-                .start();
-
+            elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
+            elementHolder.cv.animate()
+                    .setStartDelay(i * 50)
+                    .translationXBy(DisplayHelper.getWidth(context))
+                    .setInterpolator(new OvershootInterpolator())
+                    .setDuration(600)
+                    .start();
+        }
     }
 
     @Override
     public int getItemCount() {
-        return elements.size();
+        return elements.size()+1;
     }
 }

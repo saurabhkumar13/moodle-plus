@@ -22,6 +22,19 @@ public class course {
         }
     }
 
+public course(JSONObject jsonObject,int immediate)
+    {
+        try {
+            courseCode = jsonObject.getString("code").toUpperCase();
+            name = jsonObject.getString("name");
+            description = jsonObject.getString("description");
+            ltp = jsonObject.getString("l_t_p");
+            credits = jsonObject.getInt("credits");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     public int getSem() {
         return sem;
     }

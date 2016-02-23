@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:android.support.v7.cardview="http://schemas.android.com/apk/res-auto"
-    android.support.v7.cardview:cardElevation="5dp"
     android:id="@+id/cv"
     android:layout_margin="0dp"
     >
@@ -15,7 +14,11 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:drawableLeft="@drawable/ic_label_outline_blue_grey_800_18dp"
+            android:drawablePadding="8dp"
+            android:textStyle="bold"
+            android:text="Assignment 1"
+            android:padding="8dp"
             android:id="@+id/title"
             />
         <TextView

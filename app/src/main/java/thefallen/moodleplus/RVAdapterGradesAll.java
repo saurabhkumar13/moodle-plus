@@ -23,15 +23,22 @@ public class RVAdapterGradesAll extends RecyclerView.Adapter<RVAdapterGradesAll.
         TextView marks;
         TextView absMarks;
         TextView title;
+        TextView time;
         //        SymmetricIdenticon identicon;
         ElementHolder(View itemView,int itemID) {
             super(itemView);
             title = (TextView)itemView.findViewById(R.id.title);
+            cv = (CardView)itemView.findViewById(R.id.cv);
             if(itemID==2) {
-                cv = (CardView)itemView.findViewById(R.id.cv);
                 marks = (TextView)itemView.findViewById(R.id.marks);
                 absMarks = (TextView)itemView.findViewById(R.id.absMarks);
             }
+            else {
+                time = (TextView)itemView.findViewById(R.id.time);
+                marks = (TextView)itemView.findViewById(R.id.createdOn);
+                absMarks = (TextView)itemView.findViewById(R.id.description);
+            }
+
         }
     }
 
@@ -62,7 +69,7 @@ public class RVAdapterGradesAll extends RecyclerView.Adapter<RVAdapterGradesAll.
             v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grade_element, viewGroup, false);
         else
         {
-            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grade_header, viewGroup, false);
+            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.course_header, viewGroup, false);
         }
         ElementHolder eh = new ElementHolder(v,i);
         context = viewGroup.getContext();
@@ -80,8 +87,14 @@ public class RVAdapterGradesAll extends RecyclerView.Adapter<RVAdapterGradesAll.
             elementHolder.absMarks.setText(String.format("%.2f", gr.score * gr.weightage / gr.outOf) + " %");
         }
         else
-            elementHolder.title.setText(elements.get(k).get(0).course_desc);
-
+        {
+            elementHolder.cv.setCardElevation(10);
+            course header = elements.get(k).get(0).courseDetails;
+            elementHolder.time.setText("");
+            elementHolder.title.setText(header.getCourseCode()+" : "+header.getName());
+            elementHolder.absMarks.setText(header.getDescription());
+            elementHolder.marks.setText("Course Structure " + header.getLtp() + " with " + header.getCredits() + " credits");
+        }
     }
 
     @Override

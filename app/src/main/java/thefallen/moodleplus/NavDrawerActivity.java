@@ -93,6 +93,7 @@ public class NavDrawerActivity extends AppCompatActivity
     EditText comment;
     DrawerLayout drawer;
     DrawerArrowDrawable dArrow;
+    Toolbar toolbar;
     public static boolean adapterInit = false;
     int[] order = new int[]{-1,-1,1};
     AlertDialog.Builder alertDialogBuilder;
@@ -107,7 +108,7 @@ public class NavDrawerActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nav_drawer);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mToolbarContainer = ((AppBarLayout) findViewById(R.id.toolbarContainer));
 
@@ -132,6 +133,9 @@ public class NavDrawerActivity extends AppCompatActivity
         dArrow.setProgress(0.5f);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setTitle("Moodle Plus");
+        toolbar.setSubtitle("Threads"
+        );
         dArrow.setSpinEnabled(true);
 
 
@@ -150,6 +154,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
                     @Override
                     public void onItemClick(View view, final int position, boolean left) {
+                        Log.e("state",getState()+"");
                         if (getState() == state.THREADS) {
                             int thread_id = threads.get(position).getThread_id();
                             getThreadView(thread_id, position);
@@ -161,12 +166,10 @@ public class NavDrawerActivity extends AppCompatActivity
                             getAssgnView(assgn_id, position);
                         }
                         if (getState() == state.NOTIFICATIONS) {
-                            Log.e("noti", notifications.get(position).thread_id + " " + getPosition(threads, notifications.get(position).thread_id));
                             getThreadView(notifications.get(position).thread_id, getPosition(threads, notifications.get(position).thread_id));
                         }
                         if (getState() == state.SUBMISSIONS) {
                             if (position > assignment_views.size() || position == 0) return;
-                            Log.e("sad", position + " " + assignment_views.size() + " " + (position > assignment_views.size()));
                             RVAdapterAssgnShow.ElementHolder eh = (RVAdapterAssgnShow.ElementHolder) rv.findViewHolderForAdapterPosition(position);
                             final String submission_link = assignment_views.get(position - 1).getLink();
                             if (left) {
@@ -274,7 +277,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                         gradesList.add(new grade(grades_json_array.getJSONObject(i), courses_json_array.getJSONObject(i)));
                                     }
                                     initializeAdapter(new RVAdapterGradesAll(toArrayList(gradesList)));
-                                    changeState(state.NOTIFICATIONS);
+                                    changeState(state.GRADESALL);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -337,7 +340,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                         for (int i = 0; i < grades_json_array.length(); i++) {
                                             grades.add(new grade(grades_json_array.getJSONObject(i)));
                                         }
-                                        initializeAdapter(new RVAdapterGrades(grades));
+                                        initializeAdapter(new RVAdapterGrades(grades,currCourse));
                                         changeState(state.GRADES);
 
                                     } catch (JSONException e) {
@@ -357,10 +360,11 @@ public class NavDrawerActivity extends AppCompatActivity
                     intent.putExtra("courses", code);
                     startActivity(intent);
                 } else if (getState() == state.SUBMISSIONS) {
-                    if (TimeHelper.timeFromNow(assignments.get(currentAssgnpos).deadline, -1," left").equals("")) {
+                    if (TimeHelper.timeFromNow(assignments.get(currentAssgnpos-1).deadline, -1," left").equals("")) {
                         Snackbar.make(fab, "DEADLINE PASSED", Snackbar.LENGTH_SHORT).show();
                         return;
                     }
+
                     Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                     intent.setType("file/*");
                     startActivityForResult(intent, PICKFILE_RESULT_CODE);
@@ -423,12 +427,26 @@ public class NavDrawerActivity extends AppCompatActivity
                     })
                     .setInterpolator(new AccelerateDecelerateInterpolator());
         }
-        if(STATE == state.COURSE)
+        if(STATE == state.COURSE) {
+            toolbar.setSubtitle("Course");
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
-        else if(STATE == state.THREADS)
+        } else if(STATE == state.THREADS) {
+            toolbar.setSubtitle("Threads");
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
-        else if(STATE == state.SUBMISSIONS)
+        } else if(STATE == state.SUBMISSIONS) {
+            toolbar.setSubtitle("Assignment");
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_white_48dp));
+        }
+        else if(STATE == state.NOTIFICATIONS) {
+            toolbar.setSubtitle("Notifications");
+        }
+        else if(STATE == state.GRADES||STATE == state.GRADESALL) {
+            toolbar.setSubtitle("Grades");
+        }
+        else if(STATE == state.COMMENTS) {
+            toolbar.setSubtitle("Chat");
+        }
+
         if(noFabStates(State)&&!noFabStates(STATE))
             fab.animate()
                 .scaleX(1)
