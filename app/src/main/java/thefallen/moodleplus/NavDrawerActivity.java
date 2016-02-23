@@ -201,13 +201,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                                         }, new Response.ErrorListener() {
                                                     @Override
                                                     public void onErrorResponse(VolleyError volleyError) {
-//                                        if(volleyError instanceof NoConnectionError) {
-//                                            errorSnack(R.string.no_internet,true);
-//                                        } else if (volleyError instanceof TimeoutError) {
-//                                            errorSnack(R.string.timeout,true);
-//                                        } else if (volleyError instanceof ServerError) {
-//                                            errorSnack(R.string.internal_server,true);
-//                                        }
+                                                        exitToLogin();
                                                     }
                                                 });
                                                 // Add the request to the RequestQueue.
@@ -250,7 +244,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        finish();
+                        exitToLogin();
                     }
                 });
                 // Add the request to the RequestQueue.
@@ -282,7 +276,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        finish();
+                        exitToLogin();
                     }
                 });
                 // Add the request to the RequestQueue.
@@ -293,24 +287,21 @@ public class NavDrawerActivity extends AppCompatActivity
         navigationView.getMenu().add(1, 1, 1, "Logout").setIcon(R.drawable.ic_exit_to_app_blue_grey_500_24dp).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
-                sharedPreferencesEditor.putString("userID", "");
-                sharedPreferencesEditor.putString("password", "");
-                sharedPreferencesEditor.apply();
                 StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.logout(),
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                Intent intent = new Intent(mContext, LoginActivity.class);
-                                startActivity(intent);
-                                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-                                finish();
+                                SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+                                sharedPreferencesEditor.putString("userID", "");
+                                sharedPreferencesEditor.putString("password", "");
+                                sharedPreferencesEditor.apply();
+                                exitToLogin();
                             }
 
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        finish();
+                        exitToLogin();
                     }
                 });
                 // Add the request to the RequestQueue.
@@ -346,7 +337,7 @@ public class NavDrawerActivity extends AppCompatActivity
                             }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            finish();
+                            exitToLogin();
                         }
                     });
                     // Add the request to the RequestQueue.
@@ -393,7 +384,13 @@ public class NavDrawerActivity extends AppCompatActivity
     {
         return State;
     }
-
+    void exitToLogin()
+    {
+        Intent intent = new Intent(mContext, LoginActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        finish();
+    }
     void changeState(state STATE) {
         if(STATE == state.COMMENTS && State !=state.COMMENTS) {
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_send_white_36dp));
@@ -582,6 +579,7 @@ public class NavDrawerActivity extends AppCompatActivity
                             new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError volleyError) {
+                                exitToLogin();
                                 }
                             }
                     );
@@ -684,7 +682,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                 }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                finish();
+                                exitToLogin();
                             }
                         });
                         // Add the request to the RequestQueue.
@@ -759,6 +757,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                exitToLogin();
             }
         });
         // Add the request to the RequestQueue.
@@ -794,6 +793,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                exitToLogin();
             }
         });
         // Add the request to the RequestQueue.
