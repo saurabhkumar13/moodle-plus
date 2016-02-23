@@ -4,6 +4,10 @@ import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+/*
+    Hides the title bar on the top once we scroll down
+ */
+
 public abstract class HidingScrollListener extends RecyclerView.OnScrollListener {
 
     private int mToolbarOffset = 0;

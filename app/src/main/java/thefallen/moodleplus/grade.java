@@ -1,11 +1,12 @@
 package thefallen.moodleplus;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+/*
+    Class to extract and appropriately assign information about grades to variables from the JSON object
+ */
+
 
 public class grade {
     String title;

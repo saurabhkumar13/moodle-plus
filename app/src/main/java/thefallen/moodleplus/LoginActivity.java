@@ -204,6 +204,8 @@ public class LoginActivity extends AppCompatActivity {
                     else {
                         intent.putExtra("json_courses", response);
                         startActivity(intent);
+                        // Animates the transition b/w the activities
+
                         overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
                         finish();
                     }

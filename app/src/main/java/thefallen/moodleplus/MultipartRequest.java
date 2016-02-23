@@ -15,6 +15,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+/*
+    Submits a multipart file to the server
+ */
+
 public class MultipartRequest extends Request<String> {
 
     private HttpEntity mHttpEntity;
@@ -54,8 +58,6 @@ public class MultipartRequest extends Request<String> {
         builder.addPart("sub_file", fileBody);
         builder.addPart("_formname",new StringBody("sub_form", ContentType.APPLICATION_JSON));
         builder.addPart("sub_name",new StringBody(fileName, ContentType.APPLICATION_JSON));
-//        builder.addTextBody("_formname", "sub_form");
-//        builder.addTextBody("sub_name", fileName);
         return builder.build();
     }
 

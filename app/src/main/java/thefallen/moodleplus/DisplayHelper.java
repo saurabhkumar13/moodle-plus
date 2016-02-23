@@ -7,8 +7,8 @@ import android.util.DisplayMetrics;
 import java.sql.Timestamp;
 
 /*
- * Helper class to help with the calculations regarding layout parameters on the screen.
- * Functions : dpToPx, getHeight
+    Helper class to help with the calculations regarding layout parameters on the screen.
+    Functions : dpToPx, getHeight
  */
 public class DisplayHelper {
 

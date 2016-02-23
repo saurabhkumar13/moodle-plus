@@ -5,8 +5,8 @@ import org.json.JSONObject;
 
 import java.sql.Timestamp;
 
-/**
- * Created by mayank on 21/02/16.
+/*
+    CLass to extract information required for Assignment header from the JSON Object
  */
 public class assignment_header {
 

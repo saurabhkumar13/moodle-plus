@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import java.sql.Timestamp;
 
 /**
- * Created by root on 2/16/16.
+    Extracts information from JSONObject for List items in the assignment
  */
 public class assignmentListItem implements Comparable{
     int id;

@@ -3,7 +3,7 @@ package thefallen.moodleplus;
 import java.sql.Timestamp;
 
 /*
-    This class appropriates the extracted values from the JSON object and stroes them in variables for further usage
+    This class appropriates the extracted values from the JSON object and stores them in variables for further usage
  */
 public class assignment_view {
 

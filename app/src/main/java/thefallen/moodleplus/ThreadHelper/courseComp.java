@@ -1,6 +1,9 @@
 package thefallen.moodleplus.ThreadHelper;
 import java.util.Comparator;
 
+/*
+    Comparator to compare courses
+ */
 
 public class courseComp implements Comparator<thread> {
     int order=1;

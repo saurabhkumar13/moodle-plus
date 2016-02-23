@@ -3,6 +3,10 @@ package thefallen.moodleplus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/*
+    Extracts data regarding the course from the JSON object
+ */
+
 public class course {
     String courseCode,name,description,ltp;
     int credits,year,sem;

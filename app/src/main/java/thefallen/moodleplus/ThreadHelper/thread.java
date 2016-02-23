@@ -11,8 +11,8 @@ import java.util.Comparator;
 
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
-/**
- * Created by root on 2/11/16.
+/*
+    Extracts information from the JSON object and assigns values to be used later
  */
 public class thread {
     int user_id,course_id,id;
