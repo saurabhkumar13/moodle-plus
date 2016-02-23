@@ -59,13 +59,10 @@ public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHol
     @Override
     public void onBindViewHolder(ElementHolder elementHolder, int i) {
         elementHolder.title.setText(elements.get(i).name);
-        if(TimeHelper.timeFromNow(elements.get(i).createdAt,1)==null)
-            elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i).createdAt,-1));
-        else
-            elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i).createdAt,1));
+        elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i).createdAt,1));
         elementHolder.description.setText(elements.get(i).description);
         if(elements.get(i).not_seen)
-            elementHolder.cv.setCardBackgroundColor(Color.parseColor("@color/colorPrimary"));
+            elementHolder.cv.setCardBackgroundColor(Color.parseColor("#607D8B"));
         elementHolder.identicon.show(elements.get(i).user_id);
         elementHolder.course.setText(elements.get(i).course_code);
         elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
