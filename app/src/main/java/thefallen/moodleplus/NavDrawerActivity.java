@@ -21,13 +21,11 @@ import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -35,7 +33,6 @@ import android.view.MenuItem;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.CycleInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -268,7 +265,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                ArrayList gradesList = new ArrayList<>();
+                                ArrayList<grade> gradesList = new ArrayList<>();
                                 try {
                                     JSONArray grades_json_array = ((new JSONObject(response)).getJSONArray("grades"));
                                     JSONArray courses_json_array = ((new JSONObject(response)).getJSONArray("courses"));
@@ -401,9 +398,9 @@ public class NavDrawerActivity extends AppCompatActivity
         if(STATE == state.COMMENTS && State !=state.COMMENTS) {
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_send_white_36dp));
             comment.setVisibility(View.VISIBLE);
-            comment.setX(DisplayHelper.dpToPx(20,mContext)+DisplayHelper.getWidth(mContext));
+            comment.setX(DisplayHelper.getWidth(mContext));
             comment.animate()
-                    .translationXBy(-DisplayHelper.getWidth(mContext))
+                    .translationX(0)
                     .setDuration(300)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
@@ -415,7 +412,7 @@ public class NavDrawerActivity extends AppCompatActivity
         }
         else if(STATE != state.COMMENTS ) {
             comment.animate()
-                    .translationXBy(DisplayHelper.getWidth(mContext))
+                    .translationX(DisplayHelper.getWidth(mContext))
                     .setDuration(300)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
@@ -486,7 +483,9 @@ public class NavDrawerActivity extends AppCompatActivity
                     .setInterpolator(new CycleInterpolator(2));
         if (State == state.THREADS && STATE!=state.THREADS)
         {
-            android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 1).setDuration(600).start();
+            android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 1)
+                    .setDuration(600)
+                    .start();
         }
         else if (State != state.THREADS && STATE==state.THREADS)
         {
