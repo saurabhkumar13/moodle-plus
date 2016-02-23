@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -20,6 +21,7 @@ import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -130,12 +132,9 @@ public class NavDrawerActivity extends AppCompatActivity
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         dArrow = new DrawerArrowDrawable(mContext);
         toolbar.setNavigationIcon(dArrow);
-        dArrow.setProgress(0.5f);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        dArrow.setColor(Color.parseColor("#ffffff"));
         getSupportActionBar().setTitle("Moodle Plus");
-        toolbar.setSubtitle("Threads"
-        );
+        toolbar.setSubtitle("Threads");
         dArrow.setSpinEnabled(true);
 
 
@@ -487,15 +486,11 @@ public class NavDrawerActivity extends AppCompatActivity
                     .setInterpolator(new CycleInterpolator(2));
         if (State == state.THREADS && STATE!=state.THREADS)
         {
-            Log.e("dar","prog 1");
-            dArrow.setProgress(1);
-//            android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 1).setDuration(600).start();
+            android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 1).setDuration(600).start();
         }
         else if (State != state.THREADS && STATE==state.THREADS)
         {
-            Log.e("dar","prog 0");
-            dArrow.setProgress(0);
-//            android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 0).setDuration(600).start();
+            android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 0).setDuration(600).start();
         }
         State = STATE;
     }
@@ -889,10 +884,9 @@ public class NavDrawerActivity extends AppCompatActivity
         }
         else if (id == android.R.id.home)
         {
+            if(State != state.THREADS)
             onBackPressed();
-            dArrow.setProgress(0);
-            dArrow.invalidateSelf();
-            Log.e("dar",dArrow.getProgress()+" "+dArrow.isSpinEnabled());
+            else drawer.openDrawer(GravityCompat.START);
         }
 
 
