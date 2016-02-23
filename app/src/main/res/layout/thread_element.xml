@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:android.support.v7.cardview="http://schemas.android.com/apk/res-auto"
     android.support.v7.cardview:cardElevation="5dp"
-    android:layout_margin="5dp"
+    android:layout_margin="4dp"
     android:id="@+id/cv"
     android:foreground="?android:attr/selectableItemBackground"
     android:clickable="true"

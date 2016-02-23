@@ -91,7 +91,7 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
         if (i == 0)
         {
             String dstr;
-            if(TimeHelper.timeFromNow(ah.getDeadline(),-1).equals(""))
+            if(TimeHelper.timeFromNow(ah.getDeadline(),-1," left").equals(""))
             {
                 dstr = "Assignment deadline was " + TimeHelper.timeToString(ah.getDeadline());
             }
@@ -99,7 +99,7 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
                 if(((-System.currentTimeMillis() + ah.deadline.getTime()) / (1000*60*60*24))>7)
                     dstr = "Assignment deadline is on "+TimeHelper.timeToString(ah.deadline);
                 else{
-                dstr = TimeHelper.timeFromNow(ah.getDeadline(), -1) + " left ";
+                dstr = TimeHelper.timeFromNow(ah.getDeadline(), -1," left");
                 if (ah.getLatedays() != 0)
                      dstr += "+ "+ah.getLatedays() + " days **";}
             }
@@ -112,7 +112,7 @@ public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.
         }
         else {
             elementHolder.name.setText(elements.get(i-1).getName());
-            elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i - 1).getCreatedAt(),1));
+            elementHolder.time.setText(TimeHelper.timeFromNow(elements.get(i - 1).getCreatedAt(),1," ago"));
         }
     }
     @Override

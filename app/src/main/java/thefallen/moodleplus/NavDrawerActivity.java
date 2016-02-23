@@ -357,7 +357,7 @@ public class NavDrawerActivity extends AppCompatActivity
                     intent.putExtra("courses", code);
                     startActivity(intent);
                 } else if (getState() == state.SUBMISSIONS) {
-                    if (TimeHelper.timeFromNow(assignments.get(currentAssgnpos).deadline, -1).equals("")) {
+                    if (TimeHelper.timeFromNow(assignments.get(currentAssgnpos).deadline, -1," left").equals("")) {
                         Snackbar.make(fab, "DEADLINE PASSED", Snackbar.LENGTH_SHORT).show();
                         return;
                     }
@@ -720,6 +720,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
     public void getThreadView(final int id, final int position)
     {
+        if(position>=threads.size()) return;
         String url = APIdetails.thread(id);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {

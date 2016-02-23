@@ -80,7 +80,7 @@ public class RVAdapterAssignments extends RecyclerView.Adapter<RVAdapterAssignme
         }
         else
         {
-            String time = TimeHelper.timeFromNow(elements.get(i-1).deadline, -1);
+            String time = TimeHelper.timeFromNow(elements.get(i-1).deadline, -1," left");
             if(!time.equals(""))
                 elementHolder.title.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_hourglass_empty_blue_grey_500_36dp,0,0,0);
             elementHolder.time.setText(time);

@@ -14,7 +14,7 @@ public class TimeHelper {
         output : String
      */
 
-    public static String timeFromNow(Timestamp timestamp,int order)
+    public static String timeFromNow(Timestamp timestamp,int order,String extra)
     {
         String res;
         int secs = (int) (order*(System.currentTimeMillis() - timestamp.getTime()) / 1000);
@@ -32,8 +32,7 @@ public class TimeHelper {
         else if (min != 0)
             res = min + " mins " + secs + " secs";
         else res = secs + " secs";
-        if (order == 1) return res;
-        else return res + " left";
+        return res + extra;
     }
 
     /*

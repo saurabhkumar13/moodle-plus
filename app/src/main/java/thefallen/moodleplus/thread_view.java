@@ -20,7 +20,7 @@ public class thread_view {
         return user_id;
     }
     public String getCreatedAt() {
-        return TimeHelper.timeFromNow(createdAt,1);
+        return TimeHelper.timeFromNow(createdAt,1," ago");
     }
 
     public String getComment() {
