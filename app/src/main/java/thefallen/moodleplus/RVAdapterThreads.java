@@ -36,9 +36,10 @@ public class RVAdapterThreads extends RecyclerView.Adapter<RVAdapterThreads.Elem
     }
 
     List<thread> elements;
+    boolean[] elementsDisplayed;
     Context context;
     RVAdapterThreads(List<thread> elements){
-        this.elements = elements;
+        this.elements = elements;elementsDisplayed = new boolean[elements.size()];
     }
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
@@ -65,15 +66,19 @@ public class RVAdapterThreads extends RecyclerView.Adapter<RVAdapterThreads.Elem
         elementHolder.description.setText(elements.get(i).getDescription());
         elementHolder.identicon.show(elements.get(i).getUser_id());
         elementHolder.course.setText(elements.get(i).getCourse());
-        elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
-        elementHolder.cv.animate()
-                .setStartDelay(i * 100)
-                .translationXBy(DisplayHelper.getWidth(context))
-                .setInterpolator(new OvershootInterpolator())
-                .setDuration(600)
-                .start();
-
+        if(!elementsDisplayed[i])
+        {
+            elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
+            elementHolder.cv.animate()
+                    .setStartDelay(i * 100)
+                    .translationXBy(DisplayHelper.getWidth(context))
+                    .setInterpolator(new OvershootInterpolator())
+                    .setDuration(600)
+                    .start();
+            elementsDisplayed[i]=true;
+        }
     }
+
     @Override
     public int getItemCount() {
         return elements.size();

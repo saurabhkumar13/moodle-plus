@@ -6,6 +6,7 @@
     android.support.v7.cardview:cardElevation="5dp"
     android:layout_margin="5dp"
     android:id="@+id/cv"
+    android.support.v7.cardview:cardBackgroundColor="@color/colorPrimary50"
     android:foreground="?android:attr/selectableItemBackground"
     android:clickable="true"
     >

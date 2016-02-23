@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="@color/colorNavHeader"
+    android:background="@drawable/navheader_bg"
     android:theme="@style/AppTheme.AppBarOverlay">
     <View
         android:layout_width="72dp"

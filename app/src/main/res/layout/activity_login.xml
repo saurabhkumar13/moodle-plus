@@ -21,7 +21,7 @@
     <com.github.florent37.materialtextfield.MaterialTextField
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        app:mtf_openKeyboardOnFocus="true"
+        app:mtf_openKeyboardOnFocus="false"
         app:mtf_image="@drawable/ic_account_circle_blue_grey_500_36dp"
         >
 
@@ -30,6 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="username"
+        android:singleLine="true"
         android:textColor="#333"
         android:textColorHint="#666"
         android:textSize="15sp" />
@@ -37,7 +38,7 @@
     <com.github.florent37.materialtextfield.MaterialTextField
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        app:mtf_openKeyboardOnFocus="true"
+        app:mtf_openKeyboardOnFocus="false"
         app:mtf_image="@drawable/ic_vpn_key_blue_grey_500_36dp"
         >
 
@@ -46,6 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="password"
+        android:singleLine="true"
         android:inputType="textPassword"
         android:textColor="#333"
         android:textColorHint="#666"

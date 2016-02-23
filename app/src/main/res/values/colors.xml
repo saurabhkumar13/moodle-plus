@@ -4,5 +4,11 @@
     <color name="colorPrimaryDark">#546E7A</color>
     <color name="colorAccent">#FF731E</color>
     <color name="colorNavHeader">#F0FF731E</color>
-    <color name="colorMoodle">#FF731E</color>
+    <color name="colorMoodle">#F88010</color>
+    <color name="colorPrimary50">#ECEFF1</color>
+    <color name="colorPrimary100">#CFD8DC</color>
+    <color name="colorPrimary200">#B0BEC5</color>
+    <color name="colorPrimary300">#90A4AE</color>
+    <color name="colorPrimary400">#78909C</color>
+    <color name="colorPrimary800">#37474F</color>
 </resources>

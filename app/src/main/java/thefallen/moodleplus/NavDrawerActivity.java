@@ -2,6 +2,7 @@ package thefallen.moodleplus;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,8 +15,8 @@ import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -32,6 +33,7 @@ import android.view.MenuItem;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.CycleInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -89,6 +91,8 @@ public class NavDrawerActivity extends AppCompatActivity
     String course;
     String[] code;
     EditText comment;
+    DrawerLayout drawer;
+    DrawerArrowDrawable dArrow;
     public static boolean adapterInit = false;
     int[] order = new int[]{-1,-1,1};
     AlertDialog.Builder alertDialogBuilder;
@@ -122,11 +126,14 @@ public class NavDrawerActivity extends AppCompatActivity
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        dArrow = new DrawerArrowDrawable(mContext);
+        toolbar.setNavigationIcon(dArrow);
+        dArrow.setProgress(0.5f);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        dArrow.setSpinEnabled(true);
+
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -149,13 +156,12 @@ public class NavDrawerActivity extends AppCompatActivity
                         }
 
                         if (getState() == state.COURSE) {
-                            if(position==0) return;
-                            int assgn_id = assignments.get(position-1).getassgnId();
+                            if (position == 0) return;
+                            int assgn_id = assignments.get(position - 1).getassgnId();
                             getAssgnView(assgn_id, position);
                         }
-                        if(getState() == state.NOTIFICATIONS)
-                        {
-                            Log.e("noti",notifications.get(position).thread_id+" "+getPosition(threads, notifications.get(position).thread_id));
+                        if (getState() == state.NOTIFICATIONS) {
+                            Log.e("noti", notifications.get(position).thread_id + " " + getPosition(threads, notifications.get(position).thread_id));
                             getThreadView(notifications.get(position).thread_id, getPosition(threads, notifications.get(position).thread_id));
                         }
                         if (getState() == state.SUBMISSIONS) {
@@ -288,28 +294,28 @@ public class NavDrawerActivity extends AppCompatActivity
         navigationView.getMenu().add(1, 1, 1, "Logout").setIcon(R.drawable.ic_exit_to_app_blue_grey_500_24dp).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                                SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
-                                sharedPreferencesEditor.putString("userID", "");
-                                sharedPreferencesEditor.putString("password", "");
-                                sharedPreferencesEditor.apply();
-                                StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.logout(),
-                                        new Response.Listener<String>() {
-                                            @Override
-                                            public void onResponse(String response) {
-                                                Intent intent = new Intent(mContext, LoginActivity.class);
-                                                startActivity(intent);
-                                                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-                                                finish();
-                                            }
+                SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+                sharedPreferencesEditor.putString("userID", "");
+                sharedPreferencesEditor.putString("password", "");
+                sharedPreferencesEditor.apply();
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, APIdetails.logout(),
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                Intent intent = new Intent(mContext, LoginActivity.class);
+                                startActivity(intent);
+                                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                                finish();
+                            }
 
-                                        }, new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        finish();
-                                    }
-                                });
-                                // Add the request to the RequestQueue.
-                                queue.add(stringRequest);
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        finish();
+                    }
+                });
+                // Add the request to the RequestQueue.
+                queue.add(stringRequest);
                 return false;
             }
         });
@@ -350,17 +356,14 @@ public class NavDrawerActivity extends AppCompatActivity
                     Intent intent = new Intent(mContext, postThread.class);
                     intent.putExtra("courses", code);
                     startActivity(intent);
-                }
-                else if(getState() == state.SUBMISSIONS)
-                {
-                    if(TimeHelper.timeFromNow(assignments.get(currentAssgnpos).deadline,-1).equals(""))
-                    {
-                        Snackbar.make(fab,"DEADLINE PASSED",Snackbar.LENGTH_SHORT).show();
+                } else if (getState() == state.SUBMISSIONS) {
+                    if (TimeHelper.timeFromNow(assignments.get(currentAssgnpos).deadline, -1).equals("")) {
+                        Snackbar.make(fab, "DEADLINE PASSED", Snackbar.LENGTH_SHORT).show();
                         return;
                     }
                     Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                     intent.setType("file/*");
-                    startActivityForResult(intent,PICKFILE_RESULT_CODE);
+                    startActivityForResult(intent, PICKFILE_RESULT_CODE);
                 }
             }
         });
@@ -372,6 +375,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 else mToolbarContainer.setTranslationY(0);
             }
         });
+
     }
     public int getPosition(ArrayList<thread> list,int obj){
         for(int i=0;i<list.size();i++) if(list.get(i).getThread_id()==obj) return i;
@@ -463,6 +467,18 @@ public class NavDrawerActivity extends AppCompatActivity
                         }
                     })
                     .setInterpolator(new CycleInterpolator(2));
+        if (State == state.THREADS && STATE!=state.THREADS)
+        {
+            Log.e("dar","prog 1");
+            dArrow.setProgress(1);
+//            android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 1).setDuration(600).start();
+        }
+        else if (State != state.THREADS && STATE==state.THREADS)
+        {
+            Log.e("dar","prog 0");
+            dArrow.setProgress(0);
+//            android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 0).setDuration(600).start();
+        }
         State = STATE;
     }
 
@@ -788,12 +804,12 @@ public class NavDrawerActivity extends AppCompatActivity
         }
         threads = new ArrayList<>();
         getThreads(code, 0);
+        drawer.openDrawer(GravityCompat.START);
         if(getState()!=state.THREADS) changeState(state.THREADS);
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
@@ -852,9 +868,16 @@ public class NavDrawerActivity extends AppCompatActivity
             order[2]*=-1;
             return true;
         }
+        else if (id == android.R.id.home)
+        {
+            onBackPressed();
+            dArrow.setProgress(0);
+            dArrow.invalidateSelf();
+            Log.e("dar",dArrow.getProgress()+" "+dArrow.isSpinEnabled());
+        }
 
 
-        return super.onOptionsItemSelected(item);
+            return super.onOptionsItemSelected(item);
     }
 
 
