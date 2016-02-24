@@ -1,6 +1,5 @@
-#** READ THE WIKI AND START WORKING YOU FUCKTARDS** #
+#** READ THE WIKI AND START WORKING** #
 
-![meh.gif](http://awesomegifs.com/wp-content/uploads/middle-finger-rage-face.gif)
 ```
 server running at 10.0.0.16:8080 
 ```
