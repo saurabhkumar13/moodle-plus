@@ -13,6 +13,11 @@ import android.widget.TextView;
 
 import java.util.List;
 
+/*
+    Sets up the Recycler View for the display of Grades for a particular course
+*/
+
+
 public class RVAdapterGrades extends RecyclerView.Adapter<RVAdapterGrades.ElementHolder> {
 
     public static class ElementHolder extends RecyclerView.ViewHolder {

@@ -13,6 +13,11 @@ import android.widget.TextView;
 
 import java.util.List;
 
+/*
+    Sets up the Recycler View for the display of List of Assignments for a course
+*/
+
+
 public class RVAdapterAssignments extends RecyclerView.Adapter<RVAdapterAssignments.ElementHolder> {
 
     public static class ElementHolder extends RecyclerView.ViewHolder {
@@ -22,7 +27,6 @@ public class RVAdapterAssignments extends RecyclerView.Adapter<RVAdapterAssignme
         TextView createdOn;
         TextView time;
         TextView description;
-        //        SymmetricIdenticon identicon;
         ElementHolder(View itemView) {
             super(itemView);
             cv = (CardView)itemView.findViewById(R.id.cv);
@@ -30,8 +34,8 @@ public class RVAdapterAssignments extends RecyclerView.Adapter<RVAdapterAssignme
             title = (TextView)itemView.findViewById(R.id.title);
             createdOn = (TextView)itemView.findViewById(R.id.createdOn);
             description = (TextView)itemView.findViewById(R.id.description);
-//            identicon = (SymmetricIdenticon)itemView.findViewById(R.id.identicon);
         }
+
     }
 
     List<assignmentListItem> elements;
@@ -87,8 +91,6 @@ public class RVAdapterAssignments extends RecyclerView.Adapter<RVAdapterAssignme
             elementHolder.description.setText(elements.get(i-1).description);
             elementHolder.title.setText(elements.get(i-1).title);
             elementHolder.createdOn.setText("Posted on "+TimeHelper.timeToString(elements.get(i-1).createdAt));
-//        elementHolder.identicon.show(elements.get(i).user_id);
-//        elementHolder.course.setText(elements.get(i).course_code);
             elementHolder.cv.setTranslationX(-DisplayHelper.getWidth(context));
             elementHolder.cv.animate()
                     .setStartDelay(i * 100)

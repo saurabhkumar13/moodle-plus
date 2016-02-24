@@ -14,9 +14,10 @@ import java.util.List;
 
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
-/**
- * Created by mayank on 21/02/16.
+/*
+    Sets up the Recycler View for the display of assignment details
  */
+
 public class RVAdapterAssgnShow extends RecyclerView.Adapter<RVAdapterAssgnShow.ElementHolder>{
 
     public static class ElementHolder extends RecyclerView.ViewHolder {

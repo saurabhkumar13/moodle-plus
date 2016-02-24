@@ -15,6 +15,10 @@ import java.util.List;
 
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
+/*
+    Sets up the Recycler View for the display of Notifications screen
+ */
+
 public class RVAdapterNoti extends RecyclerView.Adapter<RVAdapterNoti.ElementHolder> {
 
     public static class ElementHolder extends RecyclerView.ViewHolder {

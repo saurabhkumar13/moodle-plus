@@ -2,6 +2,10 @@ package thefallen.moodleplus;
 
 import java.sql.Timestamp;
 
+/*
+   Class for comments in the thread view
+*/
+
 public class thread_view {
     int user_id;
     String comment;

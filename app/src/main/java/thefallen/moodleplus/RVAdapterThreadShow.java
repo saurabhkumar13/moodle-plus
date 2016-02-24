@@ -16,6 +16,11 @@ import java.util.List;
 
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
+/*
+    Sets up the Recycler View for the display of Details regarding a particular thread
+*/
+
+
 public class RVAdapterThreadShow extends RecyclerView.Adapter<RVAdapterThreadShow.ElementHolder> {
 
     public static class ElementHolder extends RecyclerView.ViewHolder {
