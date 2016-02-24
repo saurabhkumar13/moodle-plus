@@ -16,6 +16,7 @@ import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -70,7 +71,7 @@ import thefallen.moodleplus.identicons.SymmetricIdenticon;
 public class NavDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    //Defines all variables required for view creation and switching
+    //Defines all variables required
 
     RequestQueue queue;
     ArrayList<thefallen.moodleplus.ThreadHelper.thread> threads;
@@ -102,8 +103,9 @@ public class NavDrawerActivity extends AppCompatActivity
     int[] order = new int[]{-1,-1,1};
     AlertDialog.Builder alertDialogBuilder;
     AppBarLayout mToolbarContainer;
+    SwipeRefreshLayout swipeLayout;
 
-    //Datatype to let you know the current state of the application
+
 
     public enum state
     {
@@ -113,8 +115,6 @@ public class NavDrawerActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Set up the display
         setContentView(R.layout.activity_nav_drawer);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -122,21 +122,14 @@ public class NavDrawerActivity extends AppCompatActivity
         mToolbarContainer = ((AppBarLayout) findViewById(R.id.toolbarContainer));
 
         mContext = this;
-
-        // Check for saved Login Credentials and apply if available
-
         sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE);
         queue = Volley.newRequestQueue(this);
 
         comment = (EditText)findViewById(R.id.comment);
         alertDialogBuilder = new AlertDialog.Builder(mContext,R.style.AppthemeDialog);
 
-        //Setup the FAB to be +
-
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
-
-        //Setup the Recycler View
 
         rv = (RecyclerView) findViewById(R.id.rv);
         LinearLayoutManager llm = new LinearLayoutManager(this);
@@ -147,23 +140,32 @@ public class NavDrawerActivity extends AppCompatActivity
         dArrow = new DrawerArrowDrawable(mContext);
         toolbar.setNavigationIcon(dArrow);
         dArrow.setColor(Color.parseColor("#ffffff"));
-        getSupportActionBar().setTitle("Moodle Plus");
         toolbar.setSubtitle("Threads");
         dArrow.setSpinEnabled(true);
-
-        //Initiate the Navigation View
-
+        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                switch (State){
+                    case THREADS :  threads = new ArrayList<>();
+                                    getThreads(code,0);
+                                    break;
+                    case COMMENTS: getThreadView(currentThreadid,currentThreadpos);
+                                    break;
+                }
+            }
+        });
+        swipeLayout.setSize(SwipeRefreshLayout.LARGE);
+        swipeLayout.setProgressViewOffset(true,DisplayHelper.dpToPx(30,mContext),DisplayHelper.dpToPx(100,mContext));
+        swipeLayout.setColorSchemeColors(R.color.colorPrimary50,R.color.colorPrimary200,R.color.colorPrimary400,R.color.colorPrimary800);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         initNavDrawerHeader();
         initNavDrawerMenu();
         setItemClickListeners();
     }
-
-    // Set onClick listeners for all the menu options
-
+    // Set onClick listeners for Notifications, Grades, Logout menu items and cards in Recycler View
     public static final int PICKFILE_RESULT_CODE = 1;
-
     public void setItemClickListeners()
     {
         rv.addOnItemTouchListener(
@@ -241,8 +243,6 @@ public class NavDrawerActivity extends AppCompatActivity
                 )
         );
 
-        //Adds the see notifications button in the Navdrawer menu
-
         navigationView.getMenu().add(1, 1, 1, "Notifications").setIcon(R.drawable.ic_notifications_active_blue_grey_500_24dp).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -274,9 +274,6 @@ public class NavDrawerActivity extends AppCompatActivity
                 return false;
             }
         });
-
-        //Adds the view all grades button in the NavDrawer menu
-
         navigationView.getMenu().add(1, 1, 1, "Grades").setIcon(R.drawable.ic_school_blue_grey_500_24dp).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -309,9 +306,6 @@ public class NavDrawerActivity extends AppCompatActivity
                 return false;
             }
         });
-
-        // Adds the Logout button in the NavDrawer menu
-
         navigationView.getMenu().add(1, 1, 1, "Logout").setIcon(R.drawable.ic_exit_to_app_blue_grey_500_24dp).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -341,18 +335,10 @@ public class NavDrawerActivity extends AppCompatActivity
             }
         });
 
-        // Performs actions on clicking the FAB depending on the State
-        /*
-            COMMENTS : Post a new comment
-            COURSE : See grades for the course
-            THREAD : Post new thread
-            SUBMISSIONS : Add new Submission
-         */
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (getState() == state.COMMENTS) {
+                if (getState() == state.COMMENTS&&!comment.getText().toString().equals("")) {
                     PostComment(currentThreadid + "", comment.getText().toString());
                 }
                 if (getState() == state.COURSE) {
@@ -397,9 +383,6 @@ public class NavDrawerActivity extends AppCompatActivity
                 }
             }
         });
-
-        //Hide the title bar on scrolling down
-
         rv.addOnScrollListener(new HidingScrollListener(getStatusBarHeight() + DisplayHelper.getToolbarHeight(mContext)) {
             @Override
             public void onMoved(int distance) {
@@ -410,24 +393,10 @@ public class NavDrawerActivity extends AppCompatActivity
         });
 
     }
-
-    /*
-        function : Return position of an element in an array
-        input : ArrayList : of the objects obj : the object to be located
-        output : int position of obj
-     */
-
     public int getPosition(ArrayList<thread> list,int obj){
         for(int i=0;i<list.size();i++) if(list.get(i).getThread_id()==obj) return i;
         return -1;
     }
-
-    /*
-        function : Get height of the status bar
-        input : void
-        output : returns the height of status bar in the current view
-    */
-
     public int getStatusBarHeight() {
         int result = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -436,25 +405,18 @@ public class NavDrawerActivity extends AppCompatActivity
         }
         return result;
     }
-
     state getState()
     {
         return State;
     }
 
-    /*
-        function : transitions from the current state to the next state
-        input : STATE : the state to go to
-        output : void
-     */
-
     void changeState(state STATE) {
         if(STATE == state.COMMENTS && State !=state.COMMENTS) {
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_send_white_36dp));
             comment.setVisibility(View.VISIBLE);
-            comment.setX(DisplayHelper.dpToPx(20,mContext)+DisplayHelper.getWidth(mContext));
+            comment.setX(DisplayHelper.getWidth(mContext));
             comment.animate()
-                    .translationXBy(-DisplayHelper.getWidth(mContext))
+                    .translationX(0)
                     .setDuration(300)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
@@ -466,7 +428,7 @@ public class NavDrawerActivity extends AppCompatActivity
         }
         else if(STATE != state.COMMENTS ) {
             comment.animate()
-                    .translationXBy(DisplayHelper.getWidth(mContext))
+                    .translationX(DisplayHelper.getWidth(mContext))
                     .setDuration(300)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
@@ -543,40 +505,32 @@ public class NavDrawerActivity extends AppCompatActivity
         {
             android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 0).setDuration(600).start();
         }
+        if(STATE == state.THREADS || STATE == state.COMMENTS)
+        {
+            swipeLayout.setEnabled(true);
+        }
+        else
+            swipeLayout.setEnabled(false);
         State = STATE;
     }
-
-    // returns if the state has a fab or not
 
     boolean noFabStates(state STATE)
     {
         return STATE == state.GRADES ||STATE == state.GRADESALL ||STATE == state.NOTIFICATIONS;
     }
-
-    /*
-        function : Displays error messages using a Snackbar
-        input : int : String ID retry : bool whether to perform the function again or not.
-        output : void
-    */
-
     void errorSnack(int strID,boolean retry, final String thread_id, final String description)
     {
         Snackbar snackbar = Snackbar.make(fab, strID, Snackbar.LENGTH_SHORT);
         if(retry) snackbar.setAction("RETRY", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PostComment(thread_id,description);
+                if(!description.equals("")) {
+                    PostComment(thread_id, description);
+                }
             }
         });
         snackbar.show();
     }
-
-    /*
-        function : post comment on a thread API call
-        input : String : thread id, String description : The comment
-        output : void
-     */
-
     public void PostComment(final String thread_id,final String description)
     {
         String url = APIdetails.comment();
@@ -632,11 +586,6 @@ public class NavDrawerActivity extends AppCompatActivity
 
     }
 
-    /*
-        function : performs actions after the file for submission has been sent
-        input : request code : int result code : int data :Intent
-        output : void
-     */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -664,13 +613,6 @@ public class NavDrawerActivity extends AppCompatActivity
 
         }
     }
-
-    /*
-        function : Translates Uri to usable path
-        input : Context, Uri
-        output : String
-     */
-
     public static String getRealPathFromUri(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
@@ -689,13 +631,6 @@ public class NavDrawerActivity extends AppCompatActivity
             }
         }
     }
-
-    /*
-        function : make the input array split and then combine to form array of arrays
-        input : ArrayList
-        output : ArrayList<ArrayList>
-     */
-
     public ArrayList<ArrayList<grade>> toArrayList(ArrayList<grade> grades)
     {
         ArrayList<Integer> done_courses = new ArrayList<>();
@@ -710,9 +645,7 @@ public class NavDrawerActivity extends AppCompatActivity
         }
         return res;
     }
-
     // Extract user name, email and id from json in bundle and set the header accordingly
-
     public void initNavDrawerHeader()
     {
         View header = navigationView.inflateHeaderView(R.layout.nav_header_nav_drawer);
@@ -732,13 +665,13 @@ public class NavDrawerActivity extends AppCompatActivity
     }
 
     // Extract courses list from the json in bundle and set their onClick listeners
-
     @SuppressWarnings("deprecation")
-
     public void initNavDrawerMenu()
     {
         Menu m = navigationView.getMenu();
         topChannelMenu = m.addSubMenu("Courses");
+//        MenuItem mi = m.getItem(m.size()-1);
+//        mi.setTitle(mi.getTitle());
 
         final JSONObject courses;
         try {
@@ -788,7 +721,6 @@ public class NavDrawerActivity extends AppCompatActivity
     }
 
     // Call all APIs for all courses threads, then sort them and show in recyclerView
-
     public void getThreads(final String[] code,final int in)
     {
         String url = APIdetails.coursesThreads(code[in]);
@@ -819,8 +751,6 @@ public class NavDrawerActivity extends AppCompatActivity
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
-
-    //Set views for the threads that are displayed
 
     public void getThreadView(final int id, final int position)
     {
@@ -856,8 +786,6 @@ public class NavDrawerActivity extends AppCompatActivity
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
-
-    //Setup the view for assignment details to be viewed
 
     public void getAssgnView(final int id, final int position)
     {
@@ -896,11 +824,11 @@ public class NavDrawerActivity extends AppCompatActivity
 
 
     // Initialize cards to display
-
     private void initializeAdapter(RecyclerView.Adapter adapter){
         invalidateOptionsMenu();
         adapterInit = true;
         rv.setAdapter(adapter);
+        swipeLayout.setRefreshing(false);
     }
     @Override
     public void onResume()
@@ -995,3 +923,4 @@ public class NavDrawerActivity extends AppCompatActivity
         return true;
     }
 }
+

@@ -3,10 +3,13 @@ package thefallen.moodleplus;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.SystemClock;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -39,6 +42,7 @@ public class LoginActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     Intent intent;
     RequestQueue queue;
+    CardView cv;
     View.OnClickListener loginAction;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,8 @@ public class LoginActivity extends AppCompatActivity {
         userID= (EditText) findViewById(R.id.userid);
         password = (EditText) findViewById(R.id.password);
         login = (Button) findViewById(R.id.login);
+        cv = (CardView) findViewById(R.id.splash);
+//        cv.dispatchTouchEvent(M)
 
         loginAction = new View.OnClickListener() {
             @Override
@@ -60,6 +66,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
         login.setOnClickListener(loginAction);
+        android.os.Handler handler = new android.os.Handler();
+        handler.postDelayed(
+                new Runnable() {
+                    public void run() {
+                        cv.dispatchTouchEvent(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN, cv.getWidth() / 2, cv.getHeight() / 2, 0));
+                    }
+                }, 1000L);
     }
 
     /*
