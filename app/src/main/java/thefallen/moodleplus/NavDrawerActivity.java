@@ -2,7 +2,6 @@ package thefallen.moodleplus;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,13 +20,11 @@ import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -35,7 +32,6 @@ import android.view.MenuItem;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.CycleInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -76,32 +72,36 @@ public class NavDrawerActivity extends AppCompatActivity
     ArrayList<thefallen.moodleplus.ThreadHelper.thread> threads;
     ArrayList<thefallen.moodleplus.thread_view> thread_views;
     ArrayList<thefallen.moodleplus.assignment_view> assignment_views;
+    ArrayList<notification> notifications;
+    ArrayList<assignmentListItem> assignments;
+    ArrayList<grade> grades;
+
     int currentThreadid;
     int currentThreadpos;
     int currentAssgnId;
     int currentAssgnpos;
+
     course currCourse;
     assignment_header ah;
-    ArrayList<notification> notifications;
-    ArrayList<assignmentListItem> assignments;
-    ArrayList<grade> grades;
+
     Context mContext;
     RecyclerView rv;
     SharedPreferences sharedPreferences;
     NavigationView navigationView;
     SubMenu topChannelMenu;
-    state State=state.THREADS;
-    FloatingActionButton fab;
-    String course;
-    String[] code;
     EditText comment;
     DrawerLayout drawer;
     DrawerArrowDrawable dArrow;
-    Toolbar toolbar;
-    public static boolean adapterInit = false;
-    int[] order = new int[]{-1,-1,1};
+    FloatingActionButton fab;
     AlertDialog.Builder alertDialogBuilder;
     AppBarLayout mToolbarContainer;
+    Toolbar toolbar;
+
+    state State=state.THREADS;
+    String course;
+    String[] code;
+    public static boolean adapterInit = false;
+    int[] order = new int[]{-1,-1,1};
 
     //Datatype to let you know the current state of the application
 
@@ -109,7 +109,7 @@ public class NavDrawerActivity extends AppCompatActivity
     {
         THREADS,NOTIFICATIONS,COURSE,GRADES,COMMENTS,GRADESALL,SUBMISSIONS
     }
-
+    @SuppressWarnings("deprecation")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,7 +123,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
         mContext = this;
 
-        // Check for saved Login Credentials and apply if available
+        // Get Login Credentials
 
         sharedPreferences = getSharedPreferences("userData", MODE_PRIVATE);
         queue = Volley.newRequestQueue(this);
@@ -131,7 +131,7 @@ public class NavDrawerActivity extends AppCompatActivity
         comment = (EditText)findViewById(R.id.comment);
         alertDialogBuilder = new AlertDialog.Builder(mContext,R.style.AppthemeDialog);
 
-        //Setup the FAB to be +
+        //Setup the FAB to be create white
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_48dp));
@@ -147,7 +147,6 @@ public class NavDrawerActivity extends AppCompatActivity
         dArrow = new DrawerArrowDrawable(mContext);
         toolbar.setNavigationIcon(dArrow);
         dArrow.setColor(Color.parseColor("#ffffff"));
-        getSupportActionBar().setTitle("Moodle Plus");
         toolbar.setSubtitle("Threads");
         dArrow.setSpinEnabled(true);
 
@@ -160,6 +159,8 @@ public class NavDrawerActivity extends AppCompatActivity
         setItemClickListeners();
     }
 
+
+
     // Set onClick listeners for all the menu options
 
     public static final int PICKFILE_RESULT_CODE = 1;
@@ -171,7 +172,6 @@ public class NavDrawerActivity extends AppCompatActivity
 
                     @Override
                     public void onItemClick(View view, final int position, boolean left) {
-                        Log.e("state",getState()+"");
                         if (getState() == state.THREADS) {
                             int thread_id = threads.get(position).getThread_id();
                             getThreadView(thread_id, position);
@@ -222,6 +222,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                                         }, new Response.ErrorListener() {
                                                     @Override
                                                     public void onErrorResponse(VolleyError volleyError) {
+                                                        exitToLogin();
                                                     }
                                                 });
                                                 // Add the request to the RequestQueue.
@@ -266,7 +267,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        finish();
+                        exitToLogin();
                     }
                 });
                 // Add the request to the RequestQueue.
@@ -284,7 +285,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                ArrayList gradesList = new ArrayList<>();
+                                ArrayList<grade> gradesList = new ArrayList<>();
                                 try {
                                     JSONArray grades_json_array = ((new JSONObject(response)).getJSONArray("grades"));
                                     JSONArray courses_json_array = ((new JSONObject(response)).getJSONArray("courses"));
@@ -301,7 +302,7 @@ public class NavDrawerActivity extends AppCompatActivity
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        finish();
+                        exitToLogin();
                     }
                 });
                 // Add the request to the RequestQueue.
@@ -323,16 +324,13 @@ public class NavDrawerActivity extends AppCompatActivity
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                Intent intent = new Intent(mContext, LoginActivity.class);
-                                startActivity(intent);
-                                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-                                finish();
+                                exitToLogin();
                             }
 
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        finish();
+                        exitToLogin();
                     }
                 });
                 // Add the request to the RequestQueue.
@@ -376,7 +374,7 @@ public class NavDrawerActivity extends AppCompatActivity
                             }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            finish();
+                            exitToLogin();
                         }
                     });
                     // Add the request to the RequestQueue.
@@ -422,6 +420,16 @@ public class NavDrawerActivity extends AppCompatActivity
         return -1;
     }
 
+    /**
+     * finish activity and go back to login screen
+     */
+    void exitToLogin()
+    {
+        Intent intent = new Intent(mContext, LoginActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        finish();
+    }
     /*
         function : Get height of the status bar
         input : void
@@ -447,8 +455,11 @@ public class NavDrawerActivity extends AppCompatActivity
         input : STATE : the state to go to
         output : void
      */
-
+    @SuppressWarnings("deprecation")
     void changeState(state STATE) {
+        /**
+         * post comment editText animation
+         */
         if(STATE == state.COMMENTS && State !=state.COMMENTS) {
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_send_white_36dp));
             comment.setVisibility(View.VISIBLE);
@@ -477,6 +488,9 @@ public class NavDrawerActivity extends AppCompatActivity
                     })
                     .setInterpolator(new AccelerateDecelerateInterpolator());
         }
+        /**
+         * setting up the toolbar subtitles for different states
+         */
         if(STATE == state.COURSE) {
             toolbar.setSubtitle("Course");
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_school_white_48dp));
@@ -496,7 +510,9 @@ public class NavDrawerActivity extends AppCompatActivity
         else if(STATE == state.COMMENTS) {
             toolbar.setSubtitle("Chat");
         }
-
+        /**
+         * floating action button animations
+         */
         if(noFabStates(State)&&!noFabStates(STATE))
             fab.animate()
                 .scaleX(1)
@@ -535,6 +551,9 @@ public class NavDrawerActivity extends AppCompatActivity
                         }
                     })
                     .setInterpolator(new CycleInterpolator(2));
+        /**
+         * Drawer arrow animation
+         */
         if (State == state.THREADS && STATE!=state.THREADS)
         {
             android.animation.ObjectAnimator.ofFloat(dArrow, "progress", 1).setDuration(600).start();
@@ -546,7 +565,7 @@ public class NavDrawerActivity extends AppCompatActivity
         State = STATE;
     }
 
-    // returns if the state has a fab or not
+    // returns if the state requires a fab or not
 
     boolean noFabStates(state STATE)
     {
@@ -633,7 +652,7 @@ public class NavDrawerActivity extends AppCompatActivity
     }
 
     /*
-        function : performs actions after the file for submission has been sent
+        function : performs actions after the file for submission has been selected then adds the request to queue
         input : request code : int result code : int data :Intent
         output : void
      */
@@ -655,6 +674,7 @@ public class NavDrawerActivity extends AppCompatActivity
                             new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError volleyError) {
+                                exitToLogin();
                                 }
                             }
                     );
@@ -666,11 +686,10 @@ public class NavDrawerActivity extends AppCompatActivity
     }
 
     /*
-        function : Translates Uri to usable path
+        function : Translates image Uri to usable path
         input : Context, Uri
         output : String
      */
-
     public static String getRealPathFromUri(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
@@ -679,7 +698,7 @@ public class NavDrawerActivity extends AppCompatActivity
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             return cursor.getString(column_index);
-        } catch (NullPointerException e)
+        } catch (java.lang.NullPointerException e)
         {
             return "";
         }
@@ -691,9 +710,9 @@ public class NavDrawerActivity extends AppCompatActivity
     }
 
     /*
-        function : make the input array split and then combine to form array of arrays
-        input : ArrayList
-        output : ArrayList<ArrayList>
+        function : split the input arraylist to lists of lists categorized with course ids
+        input : ArrayList<grade>
+        output : ArrayList<ArrayList<grade>>
      */
 
     public ArrayList<ArrayList<grade>> toArrayList(ArrayList<grade> grades)
@@ -773,7 +792,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                 }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                finish();
+                                exitToLogin();
                             }
                         });
                         // Add the request to the RequestQueue.
@@ -851,6 +870,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                exitToLogin();
             }
         });
         // Add the request to the RequestQueue.
@@ -888,6 +908,7 @@ public class NavDrawerActivity extends AppCompatActivity
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                exitToLogin();
             }
         });
         // Add the request to the RequestQueue.

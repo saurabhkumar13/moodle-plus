@@ -15,6 +15,11 @@ import java.util.List;
 import thefallen.moodleplus.ThreadHelper.thread;
 import thefallen.moodleplus.identicons.SymmetricIdenticon;
 
+/*
+    Sets up the Recycler View for the display of Threads list on the home screen
+
+*/
+
 public class RVAdapterThreads extends RecyclerView.Adapter<RVAdapterThreads.ElementHolder> {
 
     public static class ElementHolder extends RecyclerView.ViewHolder {

@@ -5,6 +5,10 @@ import org.json.JSONObject;
 
 import java.sql.Timestamp;
 
+/*
+    Extract information required to show a notification from the JSON object
+ */
+
 public class notification {
     public int user_id,id,thread_id;
     public String description,course_code,name;

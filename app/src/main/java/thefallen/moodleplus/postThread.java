@@ -28,6 +28,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+    Create the view for the option of creating a new thread with spinners to select course and text area to enter the data
+ */
+
 public class postThread extends AppCompatActivity {
 
     Spinner courseSpinner;
@@ -86,12 +90,15 @@ public class postThread extends AppCompatActivity {
             postReq();
         return super.onOptionsItemSelected(item);
     }
+
+    // calls the function calling the api if the user clicks on post
     public void postReq()
     {
         String title = this.title.getText().toString(),description = this.desc.getText().toString(),course = courseCodes[(int)courseSpinner.getSelectedItemId()].toLowerCase();
         if(validate(title,description))
             callApi(title,description,course);
     }
+
     public boolean validate(String title,String desc)
     {
         return !title.equals("")&&!desc.equals("");
@@ -102,6 +109,12 @@ public class postThread extends AppCompatActivity {
         if(retry) snackbar.setAction("RETRY", sendAction);
         snackbar.show();
     }
+
+    /*
+        function : calls the API to post a new thread with appropriate parameters
+        input : title : String  , description : String , course : String
+        output : void
+     */
 
     public void callApi(final String title,final String description,final String course)
     {
